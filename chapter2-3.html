@@ -1,0 +1,1352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Reading and the Laurel</title>
+<meta name="description" content="Chapters Two and Three of an interactive exhibition: you read a short film and write its review; then fifty years of honours pile up on it, each citing the one beneath, down to the words you wrote.">
+<meta name="theme-color" content="#05070a">
+<style>
+/* layout: one 4:3 film frame held in the dark of the Chapter One cinema, the front row below it.
+   Chapter Two: gold is handwriting, the viewer's reading drawn over the film; it fades by itself.
+   Chapter Three: gold is weight, honours stacked on the screen; the viewer lifts them off one by one, down to that same reading. */
+:root{color-scheme:dark;
+  --ink:#05070a; --ivory:#f1e8d3; --gold:#cdbb8e; --gold-hi:#ebd6a0; --dim:rgba(241,232,211,.62);
+  --serif:"Cormorant Garamond","Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;
+  --sans:"Helvetica Neue",Helvetica,Arial,"Segoe UI",system-ui,sans-serif;
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --fw:640px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--ink);color:var(--ivory);overflow:hidden;overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--sans)}
+#stage{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#ui{position:fixed;inset:0;pointer-events:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;pointer-events:auto}
+button:focus-visible{outline:1px solid var(--gold);outline-offset:5px;border-radius:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* chrome (shared with the other chapters) */
+.top{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:flex-start;padding:max(18px,env(safe-area-inset-top)) clamp(16px,3vw,36px) 0;font-size:.74rem;letter-spacing:.34em;text-transform:uppercase;color:var(--dim)}
+.top .left{line-height:1.9}
+.top .left b{font-weight:400;color:var(--ivory)}
+.top .right{display:flex;gap:6px}
+.top button{padding:10px 10px;letter-spacing:.34em;text-transform:uppercase;font-size:.74rem;color:var(--dim);transition:color .6s}
+.top button:hover{color:var(--ivory)}
+#restartTop{opacity:0;visibility:hidden;transition:opacity 1.6s var(--ease)}
+#restartTop.on{opacity:1;visibility:visible}
+.bottom{position:absolute;left:0;right:0;bottom:0;padding:0 clamp(16px,3vw,36px) max(16px,env(safe-area-inset-bottom));display:flex;justify-content:center;font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:var(--dim);transition:opacity 2s var(--ease)}
+#prog{flex:1;max-width:420px}
+#prog .bar{position:relative;height:1px;background:rgba(241,232,211,.16);margin-bottom:10px}
+#prog .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--gold);opacity:.8;transition:width 2.4s var(--ease)}
+#prog .tick{position:absolute;top:-2px;width:1px;height:5px;background:rgba(241,232,211,.28)}
+#prog .lbl{text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 0 10px #000}
+body.intro .bottom,body.intro3 .bottom,body.final .bottom{opacity:0}
+
+/* the frame: everything written sits inside the film's 4:3 gate */
+#card{position:absolute;left:0;top:0;width:100px;height:75px}
+.scr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 clamp(10px,4%,44px)}
+
+/* the two openings */
+.opening{gap:clamp(8px,calc(var(--fw)*.018),18px);opacity:0;visibility:hidden;transition:opacity 1.6s var(--ease),visibility 0s 1.6s}
+body.intro #intro,body.intro3 #intro3{opacity:1;visibility:visible;transition:opacity 2.4s var(--ease),visibility 0s}
+.opening h1{font-family:var(--serif);font-weight:300;font-size:clamp(1.8rem,calc(var(--fw)*.07),4.4rem);line-height:1.05;letter-spacing:.005em;text-shadow:0 2px 40px #000;text-wrap:balance}
+.opening p{font-family:var(--serif);font-style:italic;font-size:clamp(1rem,calc(var(--fw)*.027),1.45rem);color:var(--dim)}
+.cta{margin-top:clamp(10px,calc(var(--fw)*.04),40px);display:flex;flex-direction:column;align-items:center;gap:12px;padding:6px}
+.cta .ring{position:relative;width:46px;height:46px;border-radius:50%;border:1px solid rgba(235,214,160,.75);box-shadow:0 0 22px 2px rgba(235,205,140,.35),inset 0 0 14px rgba(235,205,140,.3);animation:breathe 4.4s ease-in-out infinite}
+.cta .ring::after{content:"";position:absolute;inset:17px;border-radius:50%;background:#f3e3b4;box-shadow:0 0 14px 3px rgba(243,227,180,.7)}
+.cta .t1{font-size:.78rem;letter-spacing:.42em;text-transform:uppercase;color:var(--ivory);padding-left:.42em;text-shadow:0 0 12px #000}
+.cta .t2{font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;color:var(--dim);margin-top:-4px;padding-left:.3em}
+.cta:focus-visible{outline:none}
+.cta:hover .ring,.cta:focus-visible .ring{box-shadow:0 0 34px 5px rgba(235,205,140,.5),inset 0 0 16px rgba(235,205,140,.4)}
+@keyframes breathe{0%,100%{opacity:.78;transform:scale(1)}50%{opacity:1;transform:scale(1.07)}}
+
+/* questions */
+#ask{gap:clamp(14px,calc(var(--fw)*.042),40px);opacity:0;visibility:hidden;transition:opacity 1.2s var(--ease),visibility 0s 1.2s}
+#ask.on{opacity:1;visibility:visible;transition:opacity 1.8s var(--ease),visibility 0s}
+.q,.s{font-family:var(--serif);font-weight:400;font-size:clamp(.92rem,calc(var(--fw)*.023),1.36rem);letter-spacing:.26em;text-transform:uppercase;padding-left:.26em;line-height:1.7;text-wrap:balance;max-width:34em;text-shadow:0 1px 18px #000,0 0 3px rgba(0,0,0,.6)}
+.opts{display:grid;grid-template-columns:auto;justify-items:center}
+.opts.c2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.opts.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.opt{position:relative;min-height:44px;padding:9px 18px;font-family:var(--serif);font-style:italic;font-size:clamp(1.02rem,calc(var(--fw)*.0245),1.36rem);line-height:1.25;color:var(--dim);opacity:0;transition:opacity 1.4s var(--ease) var(--d,0s),color .6s}
+#ask.on .opt{opacity:1}
+#ask:not(.ready) .opt{pointer-events:none}
+.opts.caps .opt{font-style:normal;text-transform:uppercase;letter-spacing:.3em;padding:9px 12px 9px calc(12px + .3em);font-size:clamp(.8rem,calc(var(--fw)*.018),1.02rem)}
+.opt::after{content:"";position:absolute;left:50%;right:50%;bottom:7px;height:1px;background:var(--gold);opacity:.75;transition:left .7s var(--ease),right .7s var(--ease)}
+.opt:hover,.opt:focus-visible,.opt.chosen{color:var(--ivory)}
+.opt:hover::after,.opt:focus-visible::after,.opt.chosen::after{left:14px;right:14px}
+.opt:focus-visible{outline:none}
+#ask.picked .opt{pointer-events:none}
+#ask.picked .opt:not(.chosen){opacity:0;transition:opacity 1s var(--ease)}
+
+/* the review the viewer writes without meaning to */
+#rev{gap:clamp(8px,calc(var(--fw)*.022),20px);opacity:0;visibility:hidden;transition:opacity 1.4s var(--ease),visibility 0s 1.4s}
+#rev.on{opacity:1;visibility:visible;transition:opacity 1.8s var(--ease),visibility 0s}
+#rev .stars{font-family:var(--serif);color:var(--gold-hi);letter-spacing:.32em;padding-left:.32em;font-size:clamp(1rem,calc(var(--fw)*.03),1.6rem);text-shadow:0 0 18px rgba(235,205,140,.45)}
+#rev .quote{font-family:var(--serif);font-style:italic;font-weight:300;font-size:clamp(1.15rem,calc(var(--fw)*.04),2.3rem);line-height:1.3;max-width:24em;min-height:2.6em;text-wrap:balance;text-shadow:0 2px 24px #000}
+#rev .by{font-size:.76rem;letter-spacing:.38em;padding-left:.38em;text-transform:uppercase;color:var(--gold);opacity:0;transition:opacity 1.6s var(--ease)}
+#rev .by.on{opacity:1}
+
+/* intertitles and the endings */
+#say{gap:clamp(10px,calc(var(--fw)*.03),28px)}
+.s{opacity:0;filter:blur(6px);transform:translateY(8px);transition:opacity 1.5s var(--ease),transform 1.5s var(--ease),filter 1.5s var(--ease)}
+.s.on{opacity:1;filter:blur(0);transform:none;transition-duration:2.4s}
+.s.it{font-style:italic;text-transform:none;letter-spacing:.01em;padding-left:0;font-size:clamp(1.15rem,calc(var(--fw)*.033),2rem);line-height:1.35}
+.s.big{text-transform:none;letter-spacing:.003em;padding-left:0;font-weight:300;font-size:clamp(1.3rem,calc(var(--fw)*.047),2.7rem);line-height:1.28;text-shadow:0 2px 24px #000}
+.s.big.soft{color:var(--dim)}
+body.reduced .s{filter:none;transform:none}
+#cap{justify-content:flex-end;padding-bottom:7%}
+.btn{display:none;margin-top:clamp(8px,calc(var(--fw)*.03),26px);padding:16px 22px 16px calc(22px + .42em);font-size:.78rem;letter-spacing:.42em;text-transform:uppercase;border:1px solid rgba(205,187,142,.5);color:var(--ivory);background:rgba(5,7,10,.25);opacity:0;visibility:hidden;transition:opacity 1.6s var(--ease),visibility 0s 1.6s,background .6s}
+.btn.show{display:block}
+.btn.on{opacity:1;visibility:visible;transition:opacity 2.4s var(--ease),visibility 0s,background .6s}
+.btn:hover{background:rgba(205,187,142,.12)}
+noscript{position:fixed;inset:0;display:grid;place-items:center;text-align:center;padding:2rem;font-family:var(--serif);font-size:1.4rem}
+@media (max-width:640px){
+  .top{font-size:.66rem;letter-spacing:.26em}
+  .top .left .scn{display:none}
+}
+@media (prefers-reduced-motion:reduce){.cta .ring{animation:none}}
+</style>
+</head>
+<body class="intro">
+<canvas id="stage" aria-hidden="true"></canvas>
+<div id="ui">
+  <header class="top">
+    <div class="left"><b id="chap">Chapter Two</b><br><span class="scn" id="scn">Critics ask what it means.</span></div>
+    <div class="right">
+      <button id="snd" type="button" aria-pressed="true" aria-label="Toggle sound">Sound on</button>
+      <button id="restartTop" type="button">Restart</button>
+    </div>
+  </header>
+
+  <div id="card">
+    <section class="scr opening" id="intro">
+      <p>Chapter One asked what a film creates.</p>
+      <h1>Critics ask<br>what it means.</h1>
+      <p>Try it.</p>
+      <button class="cta" id="cta" type="button" aria-label="Start the film">
+        <span class="ring" aria-hidden="true"></span>
+        <span class="t1">Start the film</span>
+        <span class="t2">Click to begin</span>
+      </button>
+    </section>
+
+    <section class="scr opening" id="intro3">
+      <p>You are the audience.</p>
+      <h1>The canon decides<br>what matters.</h1>
+      <button class="cta" id="cta3" type="button" aria-label="Start Chapter Three" tabindex="-1">
+        <span class="ring" aria-hidden="true"></span>
+        <span class="t1">Start the film</span>
+        <span class="t2">Click to begin</span>
+      </button>
+    </section>
+
+    <section class="scr" id="ask" aria-label="Question">
+      <p class="q" id="q"></p>
+      <div class="opts" id="opts"></div>
+    </section>
+
+    <section class="scr" id="rev" aria-hidden="true">
+      <p class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</p>
+      <p class="quote" id="quote"></p>
+      <p class="by" id="by">&mdash; You</p>
+    </section>
+
+    <section class="scr" id="say">
+      <button class="btn" id="again" type="button" tabindex="-1">Watch it again</button>
+    </section>
+
+    <div class="scr" id="cap" aria-hidden="true"></div>
+  </div>
+
+  <div class="bottom">
+    <div id="prog" role="progressbar" aria-label="Progress through the chapter" aria-valuemin="1" aria-valuemax="8" aria-valuenow="1">
+      <div class="bar" id="pbar"><div class="fill" id="fill"></div></div>
+      <div class="lbl" id="lbl">01 / 08 · The Film</div>
+    </div>
+  </div>
+  <div class="sr" id="live" aria-live="polite"></div>
+</div>
+<noscript>This exhibition needs JavaScript to run.</noscript>
+
+<script>
+(()=>{
+'use strict';
+const $=s=>document.querySelector(s);
+const cv=$('#stage'),ctx=cv.getContext('2d',{alpha:false});
+let reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+matchMedia('(prefers-reduced-motion: reduce)').addEventListener?.('change',e=>{reduce=e.matches;document.body.classList.toggle('reduced',reduce)});
+document.body.classList.toggle('reduced',reduce);
+const coarse=matchMedia('(pointer: coarse)').matches;
+const SERIF='"Cormorant Garamond","Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif';
+const SANS='"Helvetica Neue",Helvetica,Arial,"Segoe UI",system-ui,sans-serif';
+const NEXT_CHAPTER='chapter4.html'; // the last chapter; the closing button leads there
+
+/* ---------- helpers ---------- */
+const clamp=(v,a,b)=>v<a?a:v>b?b:v,lerp=(a,b,t)=>a+(b-a)*t;
+const sstep=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
+const eio=t=>{t=clamp(t,0,1);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2};
+const prog=(x,a,b)=>clamp((x-a)/(b-a),0,1);
+const rgb=(r,g,b,a=1)=>`rgba(${r|0},${g|0},${b|0},${clamp(a,0,1).toFixed(3)})`;
+function mulberry(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const tween=(o,target,dur,dt)=>{const d=target-o.v,st=dt/dur;o.v+=clamp(d,-st,st)};
+const smooth=(v,t,rate,dt)=>v+(t-v)*(1-Math.exp(-dt*rate));
+
+/* ---------- the room and the film's own time ---------- */
+const R={W:2.9,D:6.5,H:3.1};
+const DOOR={x0:-2.25,x1:-1.35,h:2.05},WIN={x0:.95,x1:2.25,y0:.95,y1:2.2},LAMP={x:1.6,y:2.32,z:3.5},CH={x:.45,z:3.9};
+const NEAR=.2,END=27.5,STEP=.52,OPEN=1.25;
+/* story seconds: the one action the film ever shows. He enters, sits, looks at the window, leaves. */
+const TL={open1:[1.0,2.3],enter:[2.3,4.0],close1:[4.1,5.3],walk:[5.3,8.9],turn:[8.9,9.6],sit:[9.6,10.8],look:[11.0,12.2],
+  unlook:[15.6,16.2],rise:[16.2,17.4],back:[17.6,21.0],open2:[20.4,21.6],out:[21.7,23.3],close2:[23.5,24.7]};
+/* what is shown, and when. The film itself is the same every time; only what lies over it changes. */
+const CLIPS={film:{T0:0,T1:END},read1:{T0:8,T1:18},read2:{T0:14.5,T1:24.5},split:{T0:7,T1:19},loop:{T0:0,T1:END}};
+const STEPS2=['The Film','First Question','Your Reading','Second Question','Your Reading, Again','Your Review','Side by Side','What Remains'];
+const STEPS3=['The Premiere','Fifty Years','The Layers','The Film'];
+const Q1={q:'Why did he enter the room?',opts:[['He was looking for someone.','wait'],['He wanted to be alone.','alone'],['He was afraid of something outside.','fear'],['There was no reason.','none']]};
+const Q2={q:'What was this film about?',caps:3,opts:[['Loneliness','loneliness'],['Fear','fear'],['Waiting','waiting'],['Memory','memory'],['Death','death'],['Nothing','nothing']]};
+/* the review is assembled from the two answers: the second sets the claim, the first supplies the image */
+const REV2={loneliness:'A haunting study of loneliness.',fear:'A quiet masterpiece of dread.',waiting:'A haunting study of waiting.',
+  memory:'A meditation on memory and the rooms it keeps.',death:'An elegy that never names its dead.',nothing:'A rigorous study of nothing.'};
+const REV1={wait:'Every closed door is someone who never came.',alone:'The empty chair is the only company he can bear.',
+  fear:'The dark window looks back at him.',none:'He enters for no reason, and that is the reason.'};
+const label=(Q,v)=>(Q.opts.find(o=>o[1]===v)||Q.opts[0])[0];
+const reviewText=()=>REV2[S.q2]+' '+REV1[S.q1];
+
+/* ---------- Chapter Three: fifty years of honours, each one resting on the one beneath ----------
+   bottom to top. Each card's last line is its reason, and the reason is always the card under it.
+   The bottom card is the review from Chapter Two, and its reason is two answers that are not on the screen. */
+const Y0=1974,Y1=2026,HY=[1974.25,1984,2004,2014,2024];
+const CARDS=[
+  {id:'review', hn:0,d:0,  cx:.5, cy:.56,cw:.68,ch:.42,rot:-.02},
+  {id:'prize',  hn:0,d:.55,cx:.46,cy:.5, cw:.6, ch:.56,rot:.035},
+  {id:'retro',  hn:1,d:0,  cx:.54,cy:.47,cw:.58,ch:.6, rot:-.04},
+  {id:'restore',hn:2,d:0,  cx:.48,cy:.5, cw:.62,ch:.64,rot:.025},
+  {id:'poll',   hn:3,d:0,  cx:.53,cy:.46,cw:.58,ch:.68,rot:-.03},
+  {id:'book',   hn:4,d:0,  cx:.49,cy:.5, cw:.6, ch:.74,rot:.045}];
+const CLAP=[[.45,2.6],[.6,3],[.75,3.2],[.9,3.6],[1,5]],DROP=.6;
+
+/* ---------- state ---------- */
+let S,runId=0;
+const waits=[],PARTS=[],ST=new Map(),SCR=[{x:.23,p:.34,on:false,a:0},{x:.71,p:.2,on:false,a:0}];
+function fresh(){
+  return{mode:'intro',ch:2,mt:0,clock:0,step:0,lastStep:-1,
+    clip:null,rt:0,dur:0,pt:0,T:0,playing:false,holdEnd:false,loop:false,fade:0,lead:-1,cut:0,
+    q1:null,q2:null,dim:{v:0},dimT:0,out:{v:0},outT:0,split:{v:0},splitT:0,lumS:.1,
+    year:Y0,yearT:Y0,hon:0,landT:[0,0,0,0,0],railA:0,railT:0,dragging:false,dragged:false,hint:0,
+    cards:CARDS.map(c=>({...c,t:null,landed:false,gone:false,fly:null,back:0})),drag:null,peeled:0,lastPeel:-1e9,rsn:0,rg:0,
+    shake:0,ovEnd:0,clap:0,clapT:0,clapEnd:0,mur:0,murT:0,turnN:0,premT:0,held:null,
+    prev:{},fr:{i:-1,wx:0,wy:0,fl:0,gx:0,gy:0,dust:[],hair:null}};
+}
+S=fresh();
+function wait(s){const id=runId;return new Promise(res=>waits.push({t:S.clock+s,res,id}))}
+function until(fn){const id=runId;return new Promise(res=>waits.push({fn,res,id}))}
+function setMode(m){S.mode=m;S.mt=0}
+
+/* ---------- canvas, layout, the front row ---------- */
+let W=0,H=0,DPR=1,quality=1,bgGrad,vigGrad,grainPat,pitch=90,K=150,FW=640,FH=480,TOP=60,BARY=0,BARW=300;
+const FR={x:0,y:0,w:640,h:480},HEADS=[];let VIS=[];
+const BARH=50;
+function getSt(key){
+  let st=ST.get(key);
+  if(!st){let h=7;for(const c of key)h=(h*31+c.charCodeAt(0))|0;const r=mulberry(h^0x5bd1e995);
+    st={slump:.15,attn:0,turn:0,phone:0,ov:0,lk:0,away:0,awayV:0,tdir:r()<.5?-1:1,d:r(),r1:r(),r2:r(),ph:r()*6.28,sleep:0,stepT:0,ti:0,
+      pre:false,c2:false,arrE:1,left:0,back:0,gone:0,hs:0};
+    st.pre=r()<.55;st.arrE=1+Math.min(3,Math.floor(r()*4));st.c2=r()<.7;
+    st.away=(S.ch===2?st.c2:st.pre)?0:1;
+    ST.set(key,st)}
+  return st;
+}
+function attach(){for(const h of HEADS)h.st=getSt(h.key)}
+function resize(){
+  DPR=Math.min(devicePixelRatio||1,1.75)*quality;
+  W=Math.max(innerWidth,320);H=Math.max(innerHeight,240);
+  cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  pitch=clamp(Math.min(W/10.5,H/7.6),50,110);K=pitch/.6;
+  TOP=clamp(H*.085,46,80);
+  const bot=K*.66+10+BARH,avail=Math.max(120,H-TOP-bot);
+  FH=Math.round(Math.min(avail,(W-32)*.75));FW=Math.round(FH*4/3);
+  FR.x=Math.round((W-FW)/2);FR.y=Math.round(TOP+(avail-FH)/2);FR.w=FW;FR.h=FH;
+  const c=$('#card').style;c.left=FR.x+'px';c.top=FR.y+'px';c.width=FW+'px';c.height=FH+'px';
+  $('#card').style.setProperty('--fw',FW+'px');
+  BARY=Math.round(FR.y+FH+Math.min(30,BARH*.55));BARW=Math.min(FW*.86,560);
+  bgGrad=ctx.createLinearGradient(0,0,0,H);bgGrad.addColorStop(0,'#070a10');bgGrad.addColorStop(1,'#040507');
+  vigGrad=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.35,W/2,H/2,Math.hypot(W,H)*.62);
+  vigGrad.addColorStop(0,'rgba(0,0,0,0)');vigGrad.addColorStop(1,'rgba(0,0,0,.62)');
+  if(!grainPat){const n=document.createElement('canvas');n.width=n.height=256;const g=n.getContext('2d'),im=g.createImageData(256,256),r=mulberry(3);
+    for(let i=0;i<256*256;i++){const v=r()<.5?0:255;im.data[i*4]=im.data[i*4+1]=im.data[i*4+2]=v;im.data[i*4+3]=r()*34}
+    g.putImageData(im,0,0);grainPat=ctx.createPattern(n,'repeat')}
+  // the row in front of you; who is sitting in it depends on the year
+  HEADS.length=0;const r=mulberry(20191),aisle=Math.max(pitch*1.7,Math.min(W*.2,250));
+  for(const sd of[-1,1])for(let j=0;j<40;j++){const x=W/2+sd*(aisle+pitch*(j+.5));if(x<-pitch||x>W+pitch)break;
+    const tall=r();HEADS.push({x,key:sd+':'+j,p:{dx:(r()-.5)*.09,s:.9+r()*.24,h:1.22+tall*.12,sh:(r()-.5)*.04,hair:r()<.3?(r()<.5?-1:1):0,lean:(r()-.5)*.05}})}
+  attach();
+  const o=$('#opts');if(o.dataset.cols)o.className='opts caps c'+(FW<520?2:o.dataset.cols);
+}
+
+/* ---------- projection inside a film frame (FW, FH are the frame being drawn) ---------- */
+const cam={x:0,y:1.18,z:-1.9};
+let F=600,FCX=320,HZ=260,PX=0,PY=0;
+function setCam(){cam.x=0;cam.y=1.18;cam.z=-1.9;F=1.12*FH;HZ=.555*FH;FCX=FW/2}
+const pj=(x,y,z)=>{const k=F/Math.max(z-cam.z,.05);PX=FCX+(x-cam.x)*k;PY=HZ-(y-cam.y)*k};
+function pathPoly(a){
+  const n=a.length/3,zn=cam.z+NEAR;let started=false;
+  let qx=a[(n-1)*3],qy=a[(n-1)*3+1],qz=a[(n-1)*3+2];
+  const emit=(x,y,z)=>{pj(x,y,z);if(!started){ctx.moveTo(PX,PY);started=true}else ctx.lineTo(PX,PY)};
+  for(let i=0;i<n;i++){
+    const x=a[i*3],y=a[i*3+1],z=a[i*3+2],inC=z>=zn,inP=qz>=zn;
+    if(inC!==inP){const t=(zn-qz)/(z-qz);emit(qx+(x-qx)*t,qy+(y-qy)*t,zn)}
+    if(inC)emit(x,y,z);
+    qx=x;qy=y;qz=z;
+  }
+  return started;
+}
+function poly(a,fill,stroke,lw){
+  ctx.beginPath();if(!pathPoly(a))return;ctx.closePath();
+  if(fill){ctx.fillStyle=fill;ctx.fill()}
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=lw||1;ctx.stroke()}
+}
+function grad(x1,y1,z1,x2,y2,z2,stops){
+  const zn=cam.z+NEAR+.1;pj(x1,y1,Math.max(z1,zn));const ax=PX,ay=PY;pj(x2,y2,Math.max(z2,zn));
+  const g=ctx.createLinearGradient(ax,ay,PX,PY);for(const s of stops)g.addColorStop(s[0],s[1]);return g;
+}
+function add(fn){ctx.save();ctx.globalCompositeOperation='lighter';fn();ctx.restore()}
+function glow(x,y,r,stops){const g=ctx.createRadialGradient(x,y,0,x,y,r);for(const s of stops)g.addColorStop(s[0],s[1]);ctx.fillStyle=g;ctx.fillRect(x-r,y-r,r*2,r*2)}
+function rr(p,x,y,w,h,r,top){
+  if(top){p.moveTo(x,y+h);p.lineTo(x,y+r);p.arcTo(x,y,x+r,y,r);p.lineTo(x+w-r,y);p.arcTo(x+w,y,x+w,y+r,r);p.lineTo(x+w,y+h);p.closePath()}
+  else{p.moveTo(x+r,y);p.arcTo(x+w,y,x+w,y+h,r);p.arcTo(x+w,y+h,x,y+h,r);p.arcTo(x,y+h,x,y,r);p.arcTo(x,y,x+w,y,r);p.closePath()}
+}
+function spaced(c,t,x,y,ls){if('letterSpacing' in c&&ls){c.letterSpacing=ls.toFixed(2)+'px';c.fillText(t,x+(c.textAlign==='center'?ls/2:0),y);c.letterSpacing='0px'}else c.fillText(t,x,y)}
+
+/* ---------- the action ---------- */
+function doorAng(T){
+  return OPEN*(eio(prog(T,TL.open1[0],TL.open1[1]))*(1-eio(prog(T,TL.close1[0],TL.close1[1])))
+             +eio(prog(T,TL.open2[0],TL.open2[1]))*(1-eio(prog(T,TL.close2[0],TL.close2[1]))));
+}
+function pose(T){
+  const D=R.D,cx=CH.x,A={x:-1.8,z:D+1.0},B={x:-1.48,z:D-.98},C={x:cx,z:CH.z+.52},E={x:cx,z:CH.z+.04};
+  const L1=Math.hypot(B.x-A.x,B.z-A.z),L2=Math.hypot(C.x-B.x,C.z-B.z);
+  const P={x:A.x,z:A.z,hip:0,turn:0,look:0,walk:0,dist:0,gone:T>TL.close2[1]};
+  const mv=(a,b,p,d0,len)=>{P.x=lerp(a.x,b.x,p);P.z=lerp(a.z,b.z,p);P.dist=d0+p*len;P.walk=clamp(Math.sin(Math.PI*p)*2.4,0,1)};
+  const at=(a,d)=>{P.x=a.x;P.z=a.z;P.dist=d};
+  if(T<TL.enter[0]){}
+  else if(T<TL.enter[1])mv(A,B,sstep(TL.enter[0],TL.enter[1],T),0,L1);
+  else if(T<TL.walk[0]){at(B,L1);P.turn=Math.sin(prog(T,TL.enter[1],TL.walk[0])*Math.PI)*.85}
+  else if(T<TL.walk[1])mv(B,C,sstep(TL.walk[0],TL.walk[1],T),L1,L2);
+  else if(T<TL.turn[1]){at(C,L1+L2);P.turn=Math.sin(prog(T,TL.turn[0],TL.turn[1])*Math.PI)}
+  else if(T<TL.rise[0]){const s=eio(prog(T,TL.sit[0],TL.sit[1]));at(C,L1+L2);P.z=lerp(C.z,E.z,s);P.hip=s;
+    P.look=eio(prog(T,TL.look[0],TL.look[1]))*(1-eio(prog(T,TL.unlook[0],TL.unlook[1])))}
+  else if(T<TL.rise[1]){const s=1-eio(prog(T,TL.rise[0],TL.rise[1]));at(C,L1+L2);P.z=lerp(C.z,E.z,s);P.hip=s}
+  else if(T<TL.back[0]){at(C,L1+L2);P.turn=Math.sin(prog(T,TL.rise[1],TL.back[0])*Math.PI)*.8}
+  else if(T<TL.back[1])mv(C,B,sstep(TL.back[0],TL.back[1],T),L1+L2,L2);
+  else if(T<TL.out[0])at(B,L1+2*L2);
+  else if(T<TL.out[1])mv(B,A,sstep(TL.out[0],TL.out[1],T),L1+2*L2,L1);
+  else at(A,2*L1+2*L2);
+  P.ph=P.dist/STEP*Math.PI;P.steps=Math.floor(P.dist/STEP+.5);
+  return P;
+}
+
+/* ---------- drawing the film ---------- */
+function figure(cx,by,k,P,breath){
+  // a coat, a head, two legs: the same silhouette language as the audience in Chapter One
+  const s=P.hip,hipY=lerp(.93,.47,s),shY=lerp(1.47,1.05,s)+breath,hdY=lerp(1.64,1.225,s)+breath-(1-P.look)*.012*s;
+  const bob=P.walk*.017*Math.abs(Math.sin(P.ph)),sway=P.walk*.011*Math.sin(P.ph),ws=lerp(1,.6,P.turn);
+  const X=m=>cx+(m*ws+sway)*k,Y=m=>by-(m-bob)*k,parts=[];
+  if(s<.9)for(const sd of[-1,1]){
+    const lift=P.walk*Math.max(0,Math.sin(P.ph+(sd>0?0:Math.PI)))*.06,top=hipY-.3,p=new Path2D();
+    p.moveTo(X(sd*.02),Y(top));p.lineTo(X(sd*.16),Y(top));p.lineTo(X(sd*.135),Y(lift+.035));p.lineTo(X(sd*.15),Y(lift));p.lineTo(X(sd*.04),Y(lift));p.closePath();parts.push(p)}
+  const hem=lerp(.5,.34,s),c=new Path2D();
+  c.moveTo(X(-.21),Y(hem));c.lineTo(X(-.25),Y(hipY+.18));
+  c.quadraticCurveTo(X(-.262),Y(shY-.04),X(-.205),Y(shY+.012));
+  c.quadraticCurveTo(X(-.11),Y(shY+.06),X(-.056),Y(shY+.078));
+  c.lineTo(X(-.05),Y(hdY-.06));c.lineTo(X(.05),Y(hdY-.06));c.lineTo(X(.056),Y(shY+.078));
+  c.quadraticCurveTo(X(.11),Y(shY+.06),X(.205),Y(shY+.012));
+  c.quadraticCurveTo(X(.262),Y(shY-.04),X(.25),Y(hipY+.18));
+  c.lineTo(X(.21),Y(hem));c.closePath();parts.push(c);
+  const hx=X(-P.look*.012),hy=Y(hdY),rx=.086*k*lerp(1,1.1,Math.max(P.turn,P.look*.6)),ry=.112*k,h=new Path2D();
+  h.ellipse(hx,hy,rx,ry,0,0,6.2832);parts.push(h);
+  if(P.look>.03){ // the brow and nose that show once he turns toward the window
+    const n=new Path2D(),t=P.look;
+    n.moveTo(hx+rx*.8,hy-ry*.42);
+    n.quadraticCurveTo(hx+rx*(1+.1*t),hy-ry*.1,hx+rx*(.98+.3*t),hy+ry*.2);
+    n.quadraticCurveTo(hx+rx*(.98+.08*t),hy+ry*.34,hx+rx*(.92+.12*t),hy+ry*.62);
+    n.lineTo(hx+rx*.6,hy+ry*.8);n.closePath();parts.push(n);
+  }
+  return{parts,hx,hy};
+}
+function figureAt(x,z,P){const d=z-cam.z;if(d<.4)return null;const k=F/d;return figure(FCX+(x-cam.x)*k,HZ+cam.y*k,k,P,0)}
+function drawMan(P,backlit){
+  const d=P.z-cam.z;if(d<.4)return;
+  const k=F/d,cx=FCX+(P.x-cam.x)*k,by=HZ+cam.y*k;
+  const {parts,hx,hy}=figure(cx,by,k,P,Math.sin(S.clock*1.25)*.004*P.hip);
+  if(!backlit){
+    pj(LAMP.x,LAMP.y,LAMP.z);let vx=PX-hx,vy=PY-hy;const vl=Math.hypot(vx,vy)||1;vx/=vl;vy/=vl;
+    const dl=Math.hypot(P.x-LAMP.x,P.z-LAMP.z),o=clamp(.011*k,.8,3.4),ra=clamp(.1+.62/(1+dl*dl/2.4),0,.85);
+    ctx.save();ctx.translate(vx*o,vy*o);ctx.fillStyle=rgb(232,220,190,ra);for(const p of parts)ctx.fill(p);ctx.restore();
+  }
+  ctx.fillStyle='#030405';for(const p of parts)ctx.fill(p);
+}
+function shadowAt(x,z,len,w,a){
+  const dx=x-LAMP.x,dz=z-LAMP.z,d=Math.hypot(dx,dz)||1,ux=dx/d,uz=dz/d,nx=-uz,nz=ux,w1=w*1.9;
+  const ex=x+ux*len,ez=z+uz*len;
+  poly([x+nx*w,0,z+nz*w,x-nx*w,0,z-nz*w,ex-nx*w1,0,ez-nz*w1,ex+nx*w1,0,ez+nz*w1],grad(x,0,z,ex,0,ez,[[0,rgb(2,3,4,a)],[1,rgb(2,3,4,0)]]));
+}
+/* the wooden chair, facing the window wall, pushed into out[] as parts with a depth each */
+function chairParts(x,z,out){
+  const P=(u,y,v)=>[x+u,y,z+v],Q=(...pts)=>pts.flat();
+  const wood=v=>rgb(v,v*.95,v*.84),edge=rgb(226,214,184,.3);
+  const part=(key,fn)=>out.push({z:key,fn});
+  const leg=(u,v,h)=>{const lx=x+u,lz=z+v,sd=LAMP.x>lx?1:-1;
+    part(lz,()=>{poly([lx-.019,0,lz,lx+.019,0,lz,lx+.019,h,lz,lx-.019,h,lz],wood(46));poly([lx+sd*.019,0,lz,lx+sd*.019,h,lz],null,edge,1)})};
+  leg(-.19,.2,.45);leg(.19,.2,.45);leg(-.2,-.21,.95);leg(.2,-.21,.95);
+  part(z+.2,()=>poly(Q(P(-.19,.16,.2),P(.19,.16,.2),P(.19,.2,.2),P(-.19,.2,.2)),wood(34)));
+  for(const v of[-.21,.21])part(z+v,()=>poly(Q(P(-.22,.415,v),P(.22,.415,v),P(.22,.455,v),P(-.22,.455,v)),wood(56)));
+  part(z+.12,()=>poly(Q(P(-.22,.455,-.21),P(.22,.455,-.21),P(.22,.455,.21),P(-.22,.455,.21)),wood(122)));
+  part(z-.211,()=>{
+    poly(Q(P(-.2,.6,-.21),P(.2,.6,-.21),P(.2,.655,-.21),P(-.2,.655,-.21)),wood(56));
+    poly(Q(P(-.2,.85,-.21),P(.2,.85,-.21),P(.2,.95,-.21),P(-.2,.95,-.21)),wood(64));
+    poly(Q(P(-.2,.95,-.21),P(.2,.95,-.21)),null,rgb(226,214,184,.38),1)});
+}
+function drawLamp(){
+  const d=LAMP.z-cam.z;if(d<.5)return;const k=F/d;
+  pj(LAMP.x,R.H,LAMP.z);const tx=PX,ty=PY;pj(LAMP.x,LAMP.y,LAMP.z);const bx=PX,by=PY;
+  ctx.strokeStyle=rgb(190,182,160,.24);ctx.lineWidth=Math.max(1,.008*k);ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(bx,by-.1*k);ctx.stroke();
+  ctx.fillStyle='#0b0c0e';ctx.fillRect(bx-.022*k,by-.115*k,.044*k,.075*k);
+  add(()=>{for(const [r,a] of[[1.5,.1],[.55,.22],[.16,.55]])glow(bx,by,r*k,[[0,rgb(244,236,212,a)],[1,rgb(244,236,212,0)]])});
+  ctx.fillStyle=rgb(255,250,232);ctx.beginPath();ctx.ellipse(bx,by,.034*k,.045*k,0,0,6.2832);ctx.fill();
+}
+function drawCorridor(P){
+  const D=R.D;pj(DOOR.x0,DOOR.h,D);const ax=PX,ay=PY;pj(DOOR.x1,0,D);const bx=PX,by=PY;
+  ctx.save();ctx.beginPath();ctx.rect(ax,ay,bx-ax,by-ay);ctx.clip();
+  const zf=D+1.9,x0=DOOR.x0-1.4,x1=DOOR.x1+1.4;
+  ctx.fillStyle='#8f8975';ctx.fillRect(ax,ay,bx-ax,by-ay);
+  poly([x0,0,zf,x1,0,zf,x1,2.7,zf,x0,2.7,zf],grad(0,2.7,zf,0,0,zf,[[0,'#a39c86'],[1,'#cfc7ad']]));
+  poly([x0,2.7,D,x1,2.7,D,x1,2.7,zf,x0,2.7,zf],'#5d5849');
+  poly([x0,0,D,x1,0,D,x1,0,zf,x0,0,zf],grad(0,0,zf,0,0,D,[[0,'#9a937e'],[1,'#6f6a5a']]));
+  poly([x0,0,zf,x1,0,zf,x1,.1,zf,x0,.1,zf],'#7d7765');
+  if(P.z>=D-.02&&!P.gone){
+    poly([P.x-.2,0,P.z,P.x+.2,0,P.z,P.x+.3,0,P.z-1,P.x-.3,0,P.z-1],'rgba(20,19,16,.4)');
+    drawMan(P,true)}
+  ctx.restore();
+}
+function drawWindow(){
+  const z=R.D,k=F/(z-cam.z);
+  pj(WIN.x0,WIN.y1,z);const ax=PX,ay=PY;pj(WIN.x1,WIN.y0,z);const bx=PX,by=PY,w=bx-ax,h=by-ay;
+  const fr=.07*k;
+  ctx.fillStyle='#1d1c1a';ctx.fillRect(ax-fr,ay-fr,w+fr*2,h+fr*2);
+  ctx.strokeStyle=rgb(214,204,178,.26);ctx.lineWidth=1;ctx.strokeRect(ax-fr+.5,ay-fr+.5,w+fr*2-1,h+fr*2-1);
+  ctx.save();ctx.beginPath();ctx.rect(ax,ay,w,h);ctx.clip();
+  ctx.fillStyle='#030406';ctx.fillRect(ax,ay,w,h);
+  const g=ctx.createLinearGradient(0,ay,0,by);
+  g.addColorStop(0,rgb(126,138,158,.2));g.addColorStop(1,rgb(126,138,158,.075));ctx.fillStyle=g;ctx.fillRect(ax,ay,w,h);
+  {const zv=2*z-LAMP.z;pj(LAMP.x,LAMP.y,zv);const kv=F/(zv-cam.z),qx=PX,qy=PY;
+    add(()=>{glow(qx,qy,.34*kv,[[0,rgb(236,226,200,.2)],[1,rgb(236,226,200,0)]]);glow(qx,qy,.07*kv,[[0,rgb(246,238,214,.7)],[1,rgb(246,238,214,0)]])})}
+  ctx.restore();
+  const mw=Math.max(1.5,.04*k);
+  ctx.fillStyle='#1d1c1a';ctx.fillRect(ax+w/2-mw/2,ay,mw,h);ctx.fillRect(ax,ay+h*.45-mw/2,w,mw);
+  ctx.fillStyle=rgb(214,204,178,.16);ctx.fillRect(ax+w/2+mw/2-1,ay,1,h);ctx.fillRect(ax,ay+h*.45-mw/2,w,1);
+  ctx.fillStyle=rgb(74,70,62);ctx.fillRect(ax-fr*1.5,by+fr*.3,w+fr*3,Math.max(2,.035*k));
+}
+const leafAt=(ang,a,y)=>{const DW=DOOR.x1-DOOR.x0;return[DOOR.x0+a*DW*Math.cos(ang),y,R.D-a*DW*Math.sin(ang)]};
+function drawLeaf(ang){
+  const P=(a,y)=>leafAt(ang,a,y),sh=13+16*clamp(ang/OPEN,0,1),k=F/Math.max(R.D-cam.z,.5);
+  poly([...P(0,0),...P(1,0),...P(1,DOOR.h),...P(0,DOOR.h)],rgb(sh,sh+1,sh+3),rgb(214,204,178,.16),1);
+  for(const [y0,y1] of[[.22,.95],[1.1,1.85]])poly([...P(.14,y0),...P(.86,y0),...P(.86,y1),...P(.14,y1)],null,rgb(214,204,178,.1),1);
+  poly([...P(.86,1.02),...P(.72,1.02)],null,rgb(226,214,184,.6),Math.max(1.5,.013*k));
+}
+function drawStrip(open){
+  const a=clamp(1-open*4,0,1),z=R.D,x0=DOOR.x0+.03,x1=DOOR.x1-.03;
+  if(a<=.01)return;
+  poly([x0,0,z,x1,0,z,x1,.016,z,x0,.016,z],rgb(236,226,200,.78*a));
+  add(()=>poly([x0,0,z,x1,0,z,x1+.12,0,z-.5,x0-.12,0,z-.5],grad(0,0,z,0,0,z-.5,[[0,rgb(236,226,200,.2*a)],[1,rgb(236,226,200,0)]])));
+}
+function drawRoom(gold){
+  const T=S.T,zn=cam.z+NEAR,z0=Math.max(zn,-4),D=R.D,RW=R.W,RH=R.H;
+  const ang=doorAng(T),open=clamp(ang/OPEN,0,1),P=pose(T);
+  const kD=F/(D-cam.z),near=!P.gone&&P.z<D-.02;
+  ctx.fillStyle='#040507';ctx.fillRect(-4,-4,FW+8,FH+8);
+  if(ang>.004)drawCorridor(P);
+  const fl=[-RW,0,z0,RW,0,z0,RW,0,D,-RW,0,D];
+  poly(fl,'#0a0b0e');
+  ctx.save();ctx.beginPath();
+  if(pathPoly(fl)){ctx.closePath();ctx.clip();
+    const dl=LAMP.z-cam.z;
+    pj(LAMP.x,0,LAMP.z);{const k=F/dl,r=3*k,sy=clamp(cam.y/dl*1.3,.04,1);
+      ctx.save();ctx.translate(PX,PY);ctx.scale(1,sy);ctx.globalCompositeOperation='lighter';
+      glow(0,0,r,[[0,rgb(236,226,200,.5)],[.28,rgb(236,226,200,.22)],[.62,rgb(236,226,200,.05)],[1,rgb(236,226,200,0)]]);ctx.restore()}
+    for(let x=-RW+.31;x<RW;x+=.34)poly([x,0,z0,x,0,D],null,'rgba(0,0,0,.4)',1);
+    if(ang>.02){
+      add(()=>poly([DOOR.x0+.15,0,D,DOOR.x1,0,D,DOOR.x1+1.6,0,D-3.8,DOOR.x0+.7,0,D-3.8],
+        grad(0,0,D,0,0,D-3.8,[[0,rgb(236,226,200,.34*open)],[.5,rgb(236,226,200,.1*open)],[1,rgb(236,226,200,0)]])));
+      if(!P.gone&&P.z>D-2.4)poly([P.x-.19,0,P.z,P.x+.19,0,P.z,P.x+.5,0,P.z-2.8,P.x-.44,0,P.z-2.8],
+        grad(0,0,P.z,0,0,P.z-2.8,[[0,rgb(2,3,4,.6*open)],[1,rgb(2,3,4,0)]]));
+    }
+    shadowAt(CH.x,CH.z,.62,.25,.5);pj(CH.x,0,CH.z);
+    {const k=F/(CH.z-cam.z);ctx.save();ctx.translate(PX,PY);ctx.scale(1,clamp(cam.y/(CH.z-cam.z)*1.3,.04,1));glow(0,0,.36*k,[[0,rgb(2,3,4,.55)],[1,rgb(2,3,4,0)]]);ctx.restore()}
+    if(near&&P.hip<.6){const d=Math.hypot(P.x-LAMP.x,P.z-LAMP.z);shadowAt(P.x,P.z,clamp(d*1.15,.25,2.6),.16,.55*(1-P.hip))}
+  }
+  ctx.restore();
+  for(const sd of[-1,1]){const wp=[sd*RW,0,z0,sd*RW,RH,z0,sd*RW,RH,D,sd*RW,0,D];poly(wp,'#08090c');
+    const peak=sd>0?.24:.04,zN=Math.max(z0,cam.z+1.4),tl=clamp((D-LAMP.z)/(D-zN),.05,.95);
+    const g=grad(sd*RW,1.3,D,sd*RW,1.3,zN,[[0,rgb(226,216,190,peak*.5)],[tl,rgb(226,216,190,peak)],[1,rgb(226,216,190,0)]]);
+    add(()=>poly(wp,g))}
+  poly([-RW,RH,z0,RW,RH,z0,RW,RH,D,-RW,RH,D],'#060709');
+  ctx.save();ctx.beginPath();pathPoly([-RW,0,D,RW,0,D,RW,RH,D,-RW,RH,D]);ctx.closePath();
+  if(ang>.004){pathPoly([DOOR.x0,0,D,DOOR.x1,0,D,DOOR.x1,DOOR.h,D,DOOR.x0,DOOR.h,D]);ctx.closePath()}
+  ctx.fillStyle='#0b0c0f';ctx.fill('evenodd');ctx.clip('evenodd');
+  pj(LAMP.x,1.85,D);const wx=PX,wy=PY;
+  add(()=>{const r=4.2*kD,g=ctx.createRadialGradient(wx,wy,0,wx,wy,r);
+    g.addColorStop(0,rgb(226,216,190,.3));g.addColorStop(.36,rgb(226,216,190,.11));g.addColorStop(.75,rgb(226,216,190,.03));g.addColorStop(1,rgb(226,216,190,.014));
+    ctx.fillStyle=g;ctx.fillRect(-4,-4,FW+8,FH+8)});
+  poly([-RW,0,D,RW,0,D,RW,.1,D,-RW,.1,D],'rgba(0,0,0,.28)');
+  poly([-RW,.1,D,RW,.1,D],null,rgb(214,204,178,.07),1);
+  ctx.restore();
+  const ln=(a,al)=>poly(a,null,rgb(214,204,178,al),1);
+  ln([-RW,0,D,RW,0,D],.1);ln([-RW,RH,D,RW,RH,D],.05);
+  for(const sd of[-1,1]){ln([sd*RW,0,D,sd*RW,RH,D],.06);ln([sd*RW,0,z0,sd*RW,0,D],.05);ln([sd*RW,RH,z0,sd*RW,RH,D],.03)}
+  poly([DOOR.x0-.08,0,D,DOOR.x0-.08,DOOR.h+.08,D,DOOR.x1+.08,DOOR.h+.08,D,DOOR.x1+.08,0,D],null,rgb(214,204,178,.13),1);
+  drawWindow();drawLeaf(ang);drawStrip(open);
+  if(open>.02){pj((DOOR.x0+DOOR.x1)/2,1.1,D);const dx=PX,dy=PY;add(()=>glow(dx,dy,2.2*kD,[[0,rgb(236,226,200,.13*open)],[1,rgb(236,226,200,0)]]))}
+  const objs=[];chairParts(CH.x,CH.z,objs);
+  if(near)objs.push({z:P.z,fn:()=>drawMan(P,false)});
+  objs.sort((a,b)=>b.z-a.z);for(const o of objs)o.fn();
+  drawLamp();
+  if(gold&&(gold.a1>0||gold.a2>0))drawReading(gold,P,ang);
+}
+
+/* ---------- the reading, drawn in gold on top of a film that does not change ---------- */
+const GOLD=[235,214,160];
+function goldStroke(path,a,lw){
+  const w=Math.max(1,FH*.0026)*(lw||1),al=clamp(a*1.5,0,1);
+  add(()=>{ctx.lineJoin='round';ctx.lineCap='round';
+    ctx.strokeStyle=rgb(...GOLD,.15*al);ctx.lineWidth=w*4;path?ctx.stroke(path):ctx.stroke();
+    ctx.strokeStyle=rgb(...GOLD,.85*al);ctx.lineWidth=w;path?ctx.stroke(path):ctx.stroke()});
+}
+function gLine(pts,a,lw,closed){ // a traces the line from its first point, so a reading is seen being drawn
+  if(a<=0)return;const n=pts.length/3,sp=[];
+  for(let i=0;i<n;i++){pj(pts[i*3],pts[i*3+1],pts[i*3+2]);sp.push([PX,PY])}
+  if(closed)sp.push(sp[0]);
+  const seg=[];let tot=0;for(let i=1;i<sp.length;i++){const l=Math.hypot(sp[i][0]-sp[i-1][0],sp[i][1]-sp[i-1][1]);seg.push(l);tot+=l}
+  let rem=tot*eio(a);ctx.beginPath();ctx.moveTo(sp[0][0],sp[0][1]);
+  for(let i=1;i<sp.length&&rem>0;i++){const f=Math.min(1,rem/(seg[i-1]||1));ctx.lineTo(lerp(sp[i-1][0],sp[i][0],f),lerp(sp[i-1][1],sp[i][1],f));rem-=seg[i-1]}
+  goldStroke(null,a,lw);
+}
+function gRing(x,y,z,r,a,lw){const p=[];for(let i=0;i<48;i++){const t=i/48*6.2832;p.push(x+Math.cos(t)*r,y,z+Math.sin(t)*r)}gLine(p,a,lw,true)}
+function gFigure(x,z,P,a){const f=figureAt(x,z,P);if(!f||a<=0)return;for(const p of f.parts)goldStroke(p,a,.8)}
+function gHead(cx,cy,k,a){
+  if(a<=0)return;const p=new Path2D();p.ellipse(cx,cy,.11*k,.14*k,0,0,6.2832);
+  rr(p,cx-.25*k,cy+.17*k,.5*k,.6*k,.17*k,true);
+  goldStroke(p,a,1);
+}
+function drawReading(G,P,ang){
+  const D=R.D,RW=R.W,RH=R.H,a1=G.a1,a2=G.a2,q1=S.q1,q2=S.q2,seated={hip:1,turn:0,look:.6,walk:0,ph:0};
+  if(a2>0){
+    gLine([-RW,0,D,RW,0,D,RW,RH,D,-RW,RH,D],a2,.8,true);
+    for(const sd of[-1,1]){gLine([sd*RW,0,D,sd*RW,0,1.6],a2,.7);gLine([sd*RW,RH,D,sd*RW,RH,1.6],a2,.7)}
+    gLine([DOOR.x0-.08,0,D,DOOR.x0-.08,DOOR.h+.08,D,DOOR.x1+.08,DOOR.h+.08,D,DOOR.x1+.08,0,D],a2,.9);
+    gLine([WIN.x0,WIN.y0,D,WIN.x1,WIN.y0,D,WIN.x1,WIN.y1,D,WIN.x0,WIN.y1,D],a2,.9,true);
+    const cx=CH.x,cz=CH.z-.21;gLine([cx-.2,0,cz,cx-.2,.95,cz,cx+.2,.95,cz,cx+.2,0,cz],a2,.9);
+    if(q2==='loneliness'){gRing(CH.x,.005,CH.z,1.6,a2,.9);if(!P.gone&&P.z<D)gFigure(P.x,P.z,P,a2)}
+    else if(q2==='fear'){const s=prog(a2,.3,1);gFigure(-.55,D-.02,{hip:0,turn:0,look:0,walk:0,ph:0},s);gLine([WIN.x0,WIN.y1+.25,D,WIN.x1,WIN.y1+.25,D],s,.6)}
+    else if(q2==='waiting'){for(let i=1;i<8;i++){const t=i/8,x=lerp(-1.48,CH.x,t),z=lerp(D-.98,CH.z+.52,t),s=prog(a2,i*.08,i*.08+.3);gLine([x-.05,.005,z+.04,x+.05,.005,z-.04],s,1.2)}
+      gLine([DOOR.x0,0,D,DOOR.x1,0,D],a2,1.4)}
+    else if(q2==='memory'){gFigure(CH.x,CH.z+.04,seated,prog(a2,.2,1)*.8);gFigure(-1.48,D-.98,{hip:0,turn:0,look:0,walk:0,ph:0},prog(a2,.4,1)*.6)}
+    else if(q2==='death'){gFigure(CH.x,CH.z+.04,seated,prog(a2,.2,1)*.85);pj(LAMP.x,LAMP.y,LAMP.z);const k=F/(LAMP.z-cam.z),p=new Path2D();p.arc(PX,PY,.24*k,0,6.2832);goldStroke(p,prog(a2,.4,1),.8)}
+  }
+  if(a1>0){
+    if(q1==='wait'){
+      const L=(a,y)=>leafAt(ang,a,y);gLine([...L(.18,1.14),...L(.82,1.14),...L(.82,1.84),...L(.18,1.84)],a1,1,true);
+      if(ang<.2){const [x,y,z]=L(.5,1.5);pj(x,y,z);const k=F/(z-cam.z);ctx.save();ctx.beginPath();pathPoly([...L(.18,1.14),...L(.82,1.14),...L(.82,1.84),...L(.18,1.84)]);ctx.clip();gHead(PX,PY,k,prog(a1,.4,1));ctx.restore()}
+    }else if(q1==='alone'){gRing(CH.x,.005,CH.z,.85,a1,1.1)}
+    else if(q1==='fear'){
+      gLine([WIN.x0-.07,WIN.y0-.07,D,WIN.x1+.07,WIN.y0-.07,D,WIN.x1+.07,WIN.y1+.07,D,WIN.x0-.07,WIN.y1+.07,D],a1,1,true);
+      pj(WIN.x0+.4,1.6,D+.45);const k=F/(D+.45-cam.z);ctx.save();ctx.beginPath();pathPoly([WIN.x0,WIN.y0,D,WIN.x1,WIN.y0,D,WIN.x1,WIN.y1,D,WIN.x0,WIN.y1,D]);ctx.clip();gHead(PX,PY,k,prog(a1,.4,1));ctx.restore();
+    }else gLine([-RW,0,D,RW,0,D],a1,1);
+  }
+}
+
+function post(){
+  const f=S.fr,k=S.playing?1:.45;
+  const vg=ctx.createRadialGradient(FW/2,FH/2,FH*.28,FW/2,FH/2,FH*.9);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.78)');
+  ctx.fillStyle=vg;ctx.fillRect(-4,-4,FW+8,FH+8);
+  if(S.lead>=0){const a=Math.sin(Math.PI*clamp(S.lead/1.5,0,1));ctx.fillStyle=rgb(236,226,200,.12*a*(.75+.25*f.fl));ctx.fillRect(-4,-4,FW+8,FH+8)}
+  if(f.fl<0){ctx.fillStyle='rgba(0,0,0,'+(-f.fl*.034*k).toFixed(3)+')';ctx.fillRect(-4,-4,FW+8,FH+8)}
+  else{ctx.fillStyle=rgb(236,226,200,f.fl*.011*k);ctx.fillRect(-4,-4,FW+8,FH+8)}
+  if(S.cut>0&&!reduce){ctx.fillStyle='rgba(236,226,200,.05)';ctx.fillRect(-4,-4,FW+8,FH+8)}
+  ctx.save();ctx.translate(-f.gx,-f.gy);ctx.globalAlpha=.56;ctx.fillStyle=grainPat;ctx.fillRect(f.gx-4,f.gy-4,FW+8,FH+8);ctx.restore();
+  for(const s of SCR)if(s.on){ctx.fillStyle=rgb(236,226,200,s.a*k);ctx.fillRect(Math.round(s.x*FW),-4,1,FH+8)}
+  for(const d of f.dust){ctx.fillStyle=d.l?rgb(236,226,200,.5*k):'rgba(0,0,0,'+(.7*k).toFixed(2)+')';ctx.beginPath();ctx.ellipse(d.x*FW,d.y*FH,d.r,d.r*(.5+d.q),d.q*3,0,6.2832);ctx.fill()}
+  if(f.hair&&S.playing){const h=f.hair,x=h.x*FW,y=h.y*FH,l=h.len*FH,ex=x+Math.cos(h.a)*l,ey=y+Math.sin(h.a)*l;
+    ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo((x+ex)/2+6,(y+ey)/2-5,ex,ey);ctx.stroke()}
+  const e=Math.max(4,FH*.014);
+  for(const [x0,y0,x1,y1,rx,ry,rw,rh] of[[0,0,e,0,-4,-4,e+4,FH+8],[FW,0,FW-e,0,FW-e,-4,e+4,FH+8],[0,0,0,e,-4,-4,FW+8,e+4],[0,FH,0,FH-e,-4,FH-e,FW+8,e+4]]){
+    const g=ctx.createLinearGradient(x0,y0,x1,y1);g.addColorStop(0,'rgba(0,0,0,.9)');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(rx,ry,rw,rh)}
+}
+/* one frame of film at (x,y,w,h); FW and FH are borrowed so the room fits whatever frame it is given */
+function drawFrame(x,y,w,h,gold){
+  const f=S.fr,sw=FW,sh=FH;FW=w;FH=h;
+  ctx.save();ctx.beginPath();
+  if(ctx.roundRect)ctx.roundRect(x,y,w,h,h*.012);else ctx.rect(x,y,w,h);
+  ctx.clip();
+  ctx.fillStyle='#040507';ctx.fillRect(x,y,w,h);
+  ctx.translate(x+f.wx,y+f.wy+(S.cut>0&&!reduce?1.5:0));
+  if(S.playing){
+    setCam();drawRoom(gold);
+    const dark=1-S.fade*(1-.6*eio(S.dim.v));
+    if(dark>.002){ctx.fillStyle='rgba(0,0,0,'+dark.toFixed(3)+')';ctx.fillRect(-4,-4,FW+8,FH+8)}
+  }
+  post();
+  ctx.restore();FW=sw;FH=sh;
+}
+function goldNow(){
+  const c=S.clip,rt=S.rt;
+  if(S.rg>0)return{a1:S.rg,a2:S.rg}; // Chapter Three: the reading, glimpsed once more as the last card comes off, then gone
+  if(c==='read1')return{a1:prog(rt,1.6,3.8),a2:0};
+  if(c==='read2')return{a1:1,a2:prog(rt,1.4,4.4)};
+  if(c==='split'){const k=1-sstep(6.5,10.5,rt);return{a1:k,a2:k}}
+  return null;
+}
+function drawFilm(){
+  const sp=eio(S.split.v);
+  if(sp<.01){drawFrame(FR.x,FR.y,FW,FH,goldNow());return}
+  ctx.fillStyle='#040507';ctx.fillRect(FR.x,FR.y,FW,FH);
+  const gap=FW*.04,w=(FW-gap)/2,h=w*.75,y=FR.y+(FH-h)/2;
+  ctx.save();ctx.globalAlpha=sp;
+  drawFrame(FR.x,y,w,h,null);drawFrame(FR.x+w+gap,y,w,h,goldNow());
+  ctx.restore();
+  ctx.save();ctx.globalAlpha=sp*(1-eio(S.out.v));ctx.font=`${Math.max(11,FH*.022)|0}px ${SANS}`;
+  if('letterSpacing' in ctx)ctx.letterSpacing='.3em';ctx.textAlign='center';ctx.textBaseline='top';
+  ctx.fillStyle='rgba(241,232,211,.62)';ctx.fillText('THE FILM',FR.x+w/2,y+h+FH*.03);
+  ctx.fillStyle=rgb(205,187,142,.9);ctx.fillText('YOUR FILM',FR.x+w+gap+w/2,y+h+FH*.03);
+  if('letterSpacing' in ctx)ctx.letterSpacing='0px';
+  ctx.restore();
+}
+
+/* ---------- the honours: heavy things, drawn in each card's own coordinates ---------- */
+const INK1='rgba(34,25,12,.9)',INK2='rgba(70,52,24,.72)';
+function goldGrad(c,x0,y0,x1,y1){const g=c.createLinearGradient(x0,y0,x1,y1);
+  g.addColorStop(0,'#ecd69c');g.addColorStop(.42,'#c6a663');g.addColorStop(.68,'#e0c482');g.addColorStop(1,'#93763f');return g}
+function heavy(c,fn,k){c.save();c.shadowColor='rgba(0,0,0,'+(.6*(k||1)).toFixed(2)+')';c.shadowBlur=Math.max(4,FH*.024)*(k||1);c.shadowOffsetY=Math.max(1.5,FH*.008)*(k||1);fn();c.restore()}
+function txt(c,t,x,y,fs,o){ // one line, shrunk until it fits o.maxW
+  o=o||{};const f=s=>(o.font||'500')+' '+s.toFixed(1)+'px '+SERIF;let s=fs;c.font=f(s);
+  const ls=o.ls||0;if(o.maxW)while(c.measureText(t).width+t.length*ls*(s/fs)>o.maxW&&s>fs*.5){s*=.94;c.font=f(s)}
+  c.textAlign=o.align||'center';c.textBaseline='middle';
+  if(o.emboss){c.fillStyle='rgba(255,244,214,.5)';spaced(c,t,x,y+1,ls*(s/fs))}
+  c.fillStyle=o.color||INK1;spaced(c,t,x,y,ls*(s/fs));return s;
+}
+function wrap(c,t,fs,maxW,font){ // into at most three lines, shrinking if it must
+  for(let s=fs;;s*=.93){c.font=font+' '+s.toFixed(1)+'px '+SERIF;const out=[];let cur='';
+    for(const w of t.split(' ')){const tt=cur?cur+' '+w:w;if(cur&&c.measureText(tt).width>maxW){out.push(cur);cur=w}else cur=tt}
+    out.push(cur);if(out.length<=3||s<fs*.55)return{s,lines:out}}
+}
+function para(c,t,x,y,fs,maxW,o){ // a wrapped paragraph centred on y
+  o=o||{};const font=o.font||'italic 500',w=wrap(c,t,fs,maxW,font),lh=w.s*(o.lh||1.22);
+  c.textAlign='center';c.textBaseline='middle';
+  w.lines.forEach((l,i)=>{const yy=y+(i-(w.lines.length-1)/2)*lh;if(o.emboss){c.fillStyle='rgba(255,244,214,.5)';c.fillText(l,x,yy+1)}c.fillStyle=o.color||INK1;c.fillText(l,x,yy)});
+  return{h:lh*w.lines.length,w:Math.max(...w.lines.map(l=>c.measureText(l).width))};
+}
+/* the reason: always the card beneath. On the card you can lift, it is underlined in gold. */
+function reason(c,t,w,h,top,color){
+  const fs=Math.min(w*.04,h*.058),y=h*.38,m=para(c,t,0,y,fs,w*.84,{color});
+  if(top>0){const a=top*(.55+.45*Math.sin(S.clock*3))+S.rsn*.6,uy=y+m.h/2+fs*.2;
+    c.fillStyle=rgb(212,176,96,clamp(a,0,1));c.fillRect(-m.w/2,uy,m.w,Math.max(1,fs*.07));
+    c.save();c.globalCompositeOperation='lighter';c.fillStyle=rgb(255,220,150,.12*clamp(a,0,1));c.fillRect(-m.w/2-4,y-m.h/2-3,m.w+8,m.h+6);c.restore()}
+}
+function paperBody(c,w,h,a,b){const g=c.createLinearGradient(-w/2,-h/2,w/2,h/2);g.addColorStop(0,a);g.addColorStop(1,b);c.fillStyle=g;c.fillRect(-w/2,-h/2,w,h)}
+const LN=7;
+function leafPath(c,x,y,ang,len,w){
+  const ca=Math.cos(ang),sa=Math.sin(ang),tx=x+ca*len,ty=y+sa*len,mx=x+ca*len*.5,my=y+sa*len*.5,nx=-sa*w*.65,ny=ca*w*.65;
+  c.moveTo(x,y);c.quadraticCurveTo(mx+nx,my+ny,tx,ty);c.quadraticCurveTo(mx-nx,my-ny,x,y);
+}
+function laurel(c,cx,cy,r){
+  const p=new Path2D();
+  for(const s of[1,-1])for(let i=0;i<LN;i++){
+    const u=i/(LN-1),th=Math.PI/2+s*(.42+u*2.2),ux=Math.cos(th),uy=Math.sin(th),tang=Math.atan2(ux*s,-uy*s);let ang=tang;
+    if(i<LN-1){const a1=tang+.62,a2=tang-.62,outA=Math.cos(a1)*ux+Math.sin(a1)*uy>0?a1:a2;ang=i%2?outA:(outA===a1?a2:a1)}
+    const len=r*(i===LN-1?.44:.52-.08*u);leafPath(p,cx+r*ux,cy+r*uy,ang,len,len*.44);
+  }
+  c.fillStyle='rgba(120,92,40,.9)';c.fill(p);c.lineCap='round';c.lineWidth=Math.max(1,r*.04);c.strokeStyle='rgba(120,92,40,.9)';
+  for(const s of[1,-1]){c.beginPath();c.arc(cx,cy,r,Math.PI/2+s*.3,Math.PI/2+s*2.66,s<0);c.stroke()}
+  c.strokeStyle='rgba(255,240,200,.45)';c.lineWidth=.6;c.save();c.translate(0,1);c.stroke(p);c.restore();
+}
+function seal(c,cx,cy,Rr){
+  const n=40;
+  heavy(c,()=>{c.fillStyle=goldGrad(c,cx-Rr,cy-Rr,cx+Rr,cy+Rr);c.beginPath();
+    for(let i=0;i<=n*2;i++){const a=i/(n*2)*6.2832,r=i%2?Rr:Rr*.95,x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;i?c.lineTo(x,y):c.moveTo(x,y)}c.closePath();c.fill()},.6);
+  for(const r of[.86,.6]){c.strokeStyle='rgba(255,240,200,.45)';c.lineWidth=.8;c.beginPath();c.arc(cx,cy+1,Rr*r,0,6.2832);c.stroke();
+    c.strokeStyle='rgba(80,58,22,.55)';c.lineWidth=1.2;c.beginPath();c.arc(cx,cy,Rr*r,0,6.2832);c.stroke()}
+  const t=[...'RESTORED EDITION · 2004 · RESTORED EDITION · 2004 · '],st=6.2832/t.length,fs=Rr*.1;
+  c.font='600 '+fs.toFixed(1)+'px '+SERIF;c.textAlign='center';c.textBaseline='middle';
+  t.forEach((ch,i)=>{const a=-Math.PI/2+i*st;c.save();c.translate(cx+Math.cos(a)*Rr*.73,cy+Math.sin(a)*Rr*.73);c.rotate(a+Math.PI/2);
+    c.fillStyle='rgba(255,244,214,.5)';c.fillText(ch,0,1);c.fillStyle='rgba(66,46,16,.86)';c.fillText(ch,0,0);c.restore()});
+  txt(c,'2004',cx,cy,Rr*.28,{color:'rgba(66,46,16,.86)',emboss:1});
+}
+function cardBody(c,id,w,h,top){
+  const fs=Math.min(w*.05,h*.075),mw=w*.84;
+  if(id==='review'){ // 1974: the review. The critics' words, which are yours
+    paperBody(c,w,h,'#ece5d2','#d3c8aa');c.strokeStyle='rgba(70,52,24,.25)';c.strokeRect(-w/2+5,-h/2+5,w-10,h-10);
+    txt(c,'THE REVIEW · 1974',0,-h*.36,fs*.6,{font:'600',color:INK2,ls:fs*.16,maxW:mw});
+    txt(c,'★★★★★',0,-h*.23,fs*.85,{color:'#a8893f',ls:fs*.18});
+    para(c,'“'+reviewText()+'”',0,-h*.03,fs*.95,mw,{color:INK1});
+    txt(c,'— The critics, 1974',0,h*.18,fs*.62,{font:'600',color:INK2,ls:fs*.1,maxW:mw});
+    reason(c,'Because you answered “'+label(Q1,S.q1)+'” and “'+label(Q2,S.q2)+'”.',w,h,top,INK1);
+  }else if(id==='prize'){ // 1974: the jury, quoting the review
+    heavy(c,()=>{c.fillStyle=goldGrad(c,-w/2,-h/2,w/2,h/2);c.fillRect(-w/2,-h/2,w,h)});
+    c.strokeStyle='rgba(255,242,206,.55)';c.strokeRect(-w/2+1.5,-h/2+1.5,w-3,h-3);c.strokeStyle='rgba(80,58,22,.45)';c.strokeRect(-w/2+6,-h/2+6,w-12,h-12);
+    laurel(c,0,-h*.2,h*.15);txt(c,'1974',0,-h*.2,h*.05,{font:'600',color:'rgba(70,50,18,.85)',emboss:1});
+    txt(c,'GRAND PRIX',0,h*.03,fs*1.25,{font:'600',color:'rgba(66,46,16,.88)',ls:fs*.3,emboss:1,maxW:mw});
+    txt(c,'A first film',0,h*.15,fs*.8,{font:'italic 500',color:'rgba(66,46,16,.8)',emboss:1});
+    reason(c,'The jury’s citation: “'+REV2[S.q2]+'”',w,h,top,'rgba(52,36,12,.92)');
+  }else if(id==='retro'){ // 1984: the retrospective, because of the prize
+    paperBody(c,w,h,'#26201a','#110e0b');c.strokeStyle='rgba(205,187,142,.5)';c.strokeRect(-w/2+6,-h/2+6,w-12,h-12);
+    txt(c,'RETROSPECTIVE',0,-h*.31,fs*.7,{font:'600',color:'rgba(214,190,130,.95)',ls:fs*.3,maxW:mw});
+    txt(c,'1984',0,-h*.2,fs*.7,{font:'500',color:'rgba(214,190,130,.75)',ls:fs*.2});
+    txt(c,'A master’s first film',0,-h*.02,fs*1.25,{font:'italic 400',color:'rgba(241,232,211,.95)',maxW:mw});
+    txt(c,'“A lost masterpiece, found again.”',0,h*.13,fs*.72,{font:'italic 400',color:'rgba(214,190,130,.8)',maxW:mw});
+    reason(c,'Programmed because it won the Grand Prix in 1974.',w,h,top,'rgba(241,232,211,.88)');
+  }else if(id==='restore'){ // 2004: the restoration, because of the retrospective
+    paperBody(c,w,h,'#efe6cc','#d9cba3');c.strokeStyle='rgba(150,118,62,.55)';c.lineWidth=2;c.strokeRect(-w/2+6,-h/2+6,w-12,h-12);c.lineWidth=1;c.strokeRect(-w/2+10,-h/2+10,w-20,h-20);
+    seal(c,0,-h*.12,Math.min(h*.22,w*.24));
+    txt(c,'RESTORED EDITION',0,h*.16,fs*.68,{font:'600',color:INK2,ls:fs*.26,maxW:mw});
+    txt(c,'A film by a modern master',0,h*.24,fs*.82,{font:'italic 500',color:INK1,maxW:mw});
+    reason(c,'Restored because the 1984 retrospective called it “a lost masterpiece”.',w,h,top,INK1);
+  }else if(id==='poll'){ // 2014: the poll, because of the restoration
+    paperBody(c,w,h,'#f2eee3','#ddd6c3');
+    txt(c,'THE CRITICS’ POLL · 2014',0,-h*.39,fs*.66,{font:'600',color:INK2,ls:fs*.2,maxW:mw});
+    c.fillStyle='rgba(70,52,24,.3)';c.fillRect(-mw/2,-h*.34,mw,1);
+    const y0=-h*.25,st=h*.075;
+    c.fillStyle='rgba(212,176,96,.35)';c.fillRect(-mw/2,y0-st*.42,mw,st*.84);
+    txt(c,'1.',-mw/2+fs*.5,y0,fs*.8,{font:'600',color:INK1,align:'left'});
+    txt(c,'A film by a modern master (1974)',-mw/2+fs*1.6,y0,fs*.78,{font:'italic 600',color:INK1,align:'left',maxW:mw-fs*1.8});
+    for(let i=1;i<6;i++){const y=y0+i*st;txt(c,(i+1)+'.',-mw/2+fs*.5,y,fs*.72,{font:'500',color:INK2,align:'left'});
+      c.fillStyle='rgba(70,52,24,.22)';c.fillRect(-mw/2+fs*1.6,y-1,mw*(.5+((i*37)%30)/100),Math.max(1.5,fs*.12))}
+    reason(c,'Voted first because its 2004 restoration was hailed as a rediscovery.',w,h,top,INK1);
+  }else if(id==='book'){ // 2024: the textbook, because of the poll
+    paperBody(c,w,h,'#efe5c8','#d8c79a');c.strokeStyle=goldGrad(c,-w/2,-h/2,w/2,h/2);c.lineWidth=Math.max(2,w*.014);c.strokeRect(-w/2+1,-h/2+1,w-2,h-2);c.lineWidth=1;
+    const x0=-mw/2;
+    c.fillStyle='rgba(60,46,26,.62)';c.font='600 '+(fs*.5).toFixed(1)+'px '+SERIF;c.textBaseline='middle';
+    c.textAlign='left';spaced(c,'THE CANON',x0,-h*.43,fs*.12);c.textAlign='right';c.fillText('214',mw/2,-h*.43);
+    txt(c,'7. The Modern Masters',x0,-h*.35,fs*1.05,{font:'italic 500',color:INK1,align:'left',maxW:mw});
+    for(let i=0;i<3;i++){c.fillStyle='rgba(60,46,26,.3)';c.fillRect(x0,-h*.28+i*h*.035,mw*(i===2?.6:.95),Math.max(1,h*.007))}
+    const fy=-h*.17,fh=h*.3;c.fillStyle='#14130f';c.fillRect(x0,fy,mw,fh);
+    c.strokeStyle='rgba(214,204,178,.35)';c.strokeRect(x0+mw*.62,fy+fh*.22,mw*.2,fh*.28);c.strokeRect(x0+mw*.16,fy+fh*.26,mw*.13,fh*.52);
+    c.beginPath();c.moveTo(x0,fy+fh*.78);c.lineTo(x0+mw,fy+fh*.78);c.stroke();
+    c.fillStyle='rgba(214,204,178,.5)';c.fillRect(x0+mw*.5,fy+fh*.52,1.5,fh*.3);c.fillRect(x0+mw*.5,fy+fh*.62,mw*.07,1.5);c.fillRect(x0+mw*.565,fy+fh*.62,1,fh*.2);
+    txt(c,'Fig. 7.1  A film by the greatest director of all time, 1974.',x0,fy+fh+h*.04,fs*.52,{font:'italic 500',color:INK2,align:'left',maxW:mw});
+    for(let i=0;i<3;i++){c.fillStyle='rgba(60,46,26,.3)';c.fillRect(x0,fy+fh+h*.09+i*h*.035,mw*(i===2?.45:.95),Math.max(1,h*.007))}
+    reason(c,'Taught because it tops the Critics’ Poll.',w,h,top,INK1);
+  }
+}
+
+/* ---------- the stack on the screen ---------- */
+function cardGeom(cd){return{x:FR.x+cd.cx*FW,y:FR.y+cd.cy*FH,w:cd.cw*FW,h:cd.ch*FH}}
+function dropY(cd){
+  if(cd.t===null||cd.t<0)return null;const u=cd.t/DROP;
+  if(u<1)return -(FR.y+FH*1.2)*(1-u*u);
+  const v=(cd.t-DROP)/.3;return v<1?-FH*.014*Math.sin(Math.PI*v)*(1-v):0;
+}
+const topCard=()=>{for(let i=S.cards.length-1;i>=0;i--){const c=S.cards[i];if(!c.gone&&c.landed)return c}return null};
+function drawCardAt(cd,ox,oy,rot,lift,alpha){
+  const g=cardGeom(cd),tc=S.mode==='peel'&&cd===topCard()&&!S.drag?1:S.mode==='peel'&&S.drag&&S.drag.cd===cd?.6:0;
+  ctx.save();ctx.globalAlpha=alpha;ctx.translate(g.x+ox,g.y+oy);ctx.rotate(cd.rot+rot);ctx.scale(lift,lift);
+  heavy(ctx,()=>{ctx.fillStyle='#000';ctx.fillRect(-g.w/2,-g.h/2,g.w,g.h)},lift>1?1.6:1);
+  cardBody(ctx,cd.id,g.w,g.h,tc);
+  ctx.restore();
+}
+function drawStack(){
+  const m=S.mode;if(S.ch!==3||m==='intro3')return;
+  const a=m==='handoff'?1-eio(S.out.v):1;
+  for(const cd of S.cards){
+    if(cd.fly){const f=cd.fly;drawCardAt(cd,f.x,f.y,f.rot,1.04,a*(1-sstep(.7,1.4,f.t)));continue}
+    if(cd.gone)continue;
+    const dy=dropY(cd);if(dy===null)continue;
+    const dr=S.drag&&S.drag.cd===cd?S.drag:null,breath=m==='peel'&&cd===topCard()&&!dr?.004*Math.sin(S.clock*2.2):0;
+    drawCardAt(cd,dr?dr.dx:cd.back*cd.bx||0,(dr?dr.dy:cd.back*cd.by||0)+dy,dr?dr.dx*.0007:0,dr?1.035:1+breath,a);
+  }
+}
+function hitCard(cd,x,y){const g=cardGeom(cd),dx=x-g.x,dy=y-g.y,c=Math.cos(cd.rot),s=Math.sin(cd.rot),lx=dx*c+dy*s,ly=-dx*s+dy*c;return Math.abs(lx)<g.w/2&&Math.abs(ly)<g.h/2}
+function landHon(i){S.landT[i]=S.clock;for(const cd of S.cards)if(cd.hn===i)cd.t=-cd.d;if(i===4)S.ovEnd=S.clock+DROP+5}
+function onLand(cd){
+  S.shake=cd.hn>=3?1:.7;sndLand(cd.hn);
+  if(cd.d===0||cd.id==='review')applaud(...CLAP[cd.hn]);
+  const g=cardGeom(cd);
+  for(let i=0;i<14;i++)PARTS.push({k:'dust',x:g.x+(Math.random()-.5)*g.w,y:g.y+g.h/2,vx:(Math.random()-.5)*80,vy:-Math.random()*40,t:0,life:.8+Math.random()*.8,r:.6+Math.random()*1.8,nograv:1});
+}
+function peel(cd,dx,dy){ // the card comes away in the direction it was pulled, and falls past the row
+  let l=Math.hypot(dx,dy);if(l<8){dx=(cd.cx<.5?-1:1)*.55;dy=-.85;l=1}
+  const sp=FH*2.4;cd.gone=true;cd.back=0;
+  cd.fly={x:S.drag&&S.drag.cd===cd?S.drag.dx:0,y:S.drag&&S.drag.cd===cd?S.drag.dy:0,vx:dx/l*sp,vy:dy/l*sp-FH*.4,rot:0,va:(dx>0?1:-1)*(1.5+Math.random()),t:0};
+  S.peeled++;S.lastPeel=S.clock;S.rsn=1;S.hint=0;
+  sndPeel(cd.id);sndShush(.04+.05*S.peeled/6,(Math.random()-.5)*1.3);if(S.peeled>2)sndShush(.035,(Math.random()-.5)*1.3,.35);
+  const nt=topCard();
+  live(nt?'Underneath: '+({review:'the review from 1974. Its reason: your two answers in Chapter Two.',prize:'the Grand Prix, 1974. Its reason: the review.',retro:'the 1984 retrospective. Its reason: the Grand Prix.',restore:'the 2004 restoration. Its reason: the retrospective.',poll:'the Critics’ Poll, 2014. Its reason: the restoration.'})[nt.id]:'The last card is gone. The film is alone on the screen.');
+}
+
+/* ---------- particles ---------- */
+function updParts(dt){
+  for(let i=PARTS.length-1;i>=0;i--){const p=PARTS[i];p.t+=dt;if(p.t>p.life){PARTS.splice(i,1);continue}
+    p.vx*=Math.exp(-dt*3);p.vy*=Math.exp(-dt*3);p.x+=p.vx*dt;p.y+=p.vy*dt}
+  for(const cd of S.cards){if(cd.fly){const f=cd.fly;f.t+=dt;f.vy+=FH*2.2*dt;f.x+=f.vx*dt;f.y+=f.vy*dt;f.rot+=f.va*dt;if(f.t>1.5)cd.fly=null}
+    if(cd.back>0)cd.back=Math.max(0,cd.back-dt*4)}
+}
+function drawParts(){for(const p of PARTS){const a=1-sstep(p.life*.4,p.life,p.t);if(a<=0)continue;ctx.fillStyle=rgb(226,214,184,.35*a);ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,6.2832);ctx.fill()}}
+
+/* ---------- the cinema around the frame ---------- */
+function drawHall(){
+  const lum=S.lumS,cx=FR.x+FW/2,cy=FR.y+FH/2,hr=Math.max(FW,FH)*1.05,gd=S.ch===3&&S.mode!=='handoff'?S.hon/5:0;
+  ctx.fillStyle=bgGrad;ctx.fillRect(-W,-H,W*3,H*3);
+  const ag=ctx.createLinearGradient(0,0,0,H*.5);ag.addColorStop(0,'rgba(40,56,84,.10)');ag.addColorStop(1,'rgba(40,56,84,0)');
+  ctx.fillStyle=ag;ctx.fillRect(-W,-H,W*3,H*1.5);
+  add(()=>{glow(cx,cy,hr,[[0,rgb(235,220,185,.24*lum)],[.5,rgb(235,220,185,.07*lum)],[1,rgb(235,220,185,0)]]);
+    if(gd>.01)glow(cx,cy,hr*1.15,[[.3,rgb(235,200,130,.06*gd)],[1,rgb(235,200,130,0)]])});
+  ctx.fillStyle='#07090d';ctx.fillRect(FR.x-7,FR.y-7,FW+14,FH+14);
+  ctx.strokeStyle=rgb(205,190,150,.1+.22*lum);ctx.lineWidth=1;ctx.strokeRect(FR.x-6.5,FR.y-6.5,FW+13,FH+13);
+  // each honour still on the screen adds a gilt line to its frame
+  if(gd>.01){const n=S.mode==='peel'||S.mode==='after'?6-S.peeled-1:S.hon;for(let i=0;i<n;i++){const o=10+i*4.5;ctx.strokeStyle=rgb(212,190,138,.5-.07*i);ctx.lineWidth=i===0?1.5:1;ctx.strokeRect(FR.x-o-.5,FR.y-o-.5,FW+2*o+1,FH+2*o+1)}}
+}
+
+/* ---------- the timeline under the screen ---------- */
+const yearX=y=>W/2-BARW/2+BARW*(y-Y0)/(Y1-Y0);
+const xYear=x=>Y0+(Y1-Y0)*clamp((x-(W/2-BARW/2))/BARW,0,1);
+function drawRail(){
+  const a=S.railA;if(a<.01)return;
+  const x0=W/2-BARW/2,y=BARY,hx=yearX(S.year);
+  ctx.fillStyle=rgb(241,232,211,.18*a);ctx.fillRect(x0,y,BARW,1);
+  ctx.fillStyle=rgb(205,187,142,.6*a);ctx.fillRect(x0,y,hx-x0,1);
+  for(let d=1980;d<=2020;d+=10){ctx.fillStyle=rgb(241,232,211,.22*a);ctx.fillRect(Math.round(yearX(d)),y-2,1,5)}
+  HY.forEach((hy,i)=>{const on=S.hon>i;ctx.fillStyle=on?rgb(220,196,140,.9*a):rgb(205,187,142,.35*a);ctx.beginPath();ctx.arc(yearX(Math.round(hy)),y+.5,on?2.4:1.6,0,6.2832);ctx.fill()});
+  ctx.font='400 11px '+SANS;ctx.textBaseline='top';ctx.fillStyle=rgb(241,232,211,.4*a);
+  if(hx-x0>40){ctx.textAlign='left';spaced(ctx,String(Y0),x0,y+9,2)}
+  if(x0+BARW-hx>40){ctx.textAlign='right';spaced(ctx,'TODAY',x0+BARW,y+9,2)}
+  const pulse=S.dragged?0:.5+.5*Math.sin(S.clock*3);
+  if(pulse>0)add(()=>glow(hx,y,18,[[0,rgb(235,214,160,.25*pulse*a)],[1,rgb(235,214,160,0)]]));
+  ctx.fillStyle=rgb(241,232,211,.95*a);ctx.fillRect(Math.round(hx),y-8,1,17);
+  ctx.save();ctx.translate(hx,y+.5);ctx.rotate(Math.PI/4);ctx.fillStyle=rgb(220,196,140,a);ctx.fillRect(-3,-3,6,6);ctx.restore();
+  ctx.font='400 '+Math.round(clamp(FH*.035,14,19))+'px '+SERIF;ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillStyle=rgb(241,232,211,.9*a);
+  ctx.fillText(S.year>=Y1?'Today':String(Math.floor(S.year)),hx,y-11);
+  if(S.hint>.01&&S.mode==='years'){ctx.font='400 11px '+SANS;ctx.textBaseline='top';ctx.fillStyle=rgb(241,232,211,.5*S.hint*a);ctx.textAlign='center';spaced(ctx,'DRAG',hx,y+22,3.2)}
+}
+function drawPeelHint(){
+  if(S.hint<.01||S.mode!=='peel')return;
+  ctx.font='400 11px '+SANS;ctx.textBaseline='top';ctx.textAlign='center';ctx.fillStyle=rgb(241,232,211,.5*S.hint);
+  spaced(ctx,'DRAG THE TOP LAYER AWAY',W/2,BARY+2,3.2);
+}
+
+/* ---------- the front row ---------- */
+function person(h,yT,o,ra){
+  const p=h.p,st=h.st,a=st.away,stand=sstep(0,.25,a),walk=sstep(.25,.62,a),ap=sstep(.62,1,a);
+  const sl=st.slump*(1-stand),at=st.attn*(1-stand),side=p.dx>=0?1:-1,ov=st.ov*(1-stand);
+  const lean=(p.lean*(1-at*.7)+side*.07*sl*(st.sleep?1.8:1))*(1-stand);
+  const drop=(.06*sl*(st.sleep?1.5:1)-.022*at-.03*st.lk)*(1-stand),rise=.5*stand+.4*ov;
+  const bob=S.clap*.012*Math.sin(S.clock*13+st.ph)*(1-st.turn)+(walk>0&&ap<1?.012*Math.abs(Math.sin(a*48)):0);
+  const wx=(W/2-h.x)*walk;
+  const hx=h.x+(p.dx+lean)*K+wx,hy=yT-(p.h-.95-drop+rise+bob)*K;
+  const shY=yT-(.15+p.sh+rise+bob-.03*sl)*K;
+  const pp=new Path2D();
+  rr(pp,h.x+(-.235+p.dx*.4+lean*.35)*K+wx,shY,.47*K,(.28+rise*1.3)*K,.11*K,false);
+  pp.rect(hx-.045*K,hy,.09*K,shY-hy+.05*K);
+  const tw=Math.sin(Math.PI*clamp(st.turn,0,1)),rx=.105*p.s*K*(1-.1*tw),ry=.135*p.s*K;
+  pp.moveTo(hx+rx,hy);pp.ellipse(hx,hy,rx,ry,lean*.5,0,6.2832);
+  if(p.hair){pp.moveTo(hx+p.hair*rx*.5+rx*.62,hy-ry*.75);pp.ellipse(hx+p.hair*rx*.5,hy-ry*.75,rx*.62,ry*.5,0,0,6.2832)}
+  if(tw>.06){const nx=hx+st.tdir*rx*.86,n=.04*K*tw;pp.moveTo(nx,hy-ry*.3);pp.lineTo(nx+st.tdir*n,hy+ry*.1);pp.lineTo(nx,hy+ry*.32);pp.closePath()}
+  ctx.save();
+  if(ap>0){const ax=W/2,ay=yT+.15*K,sc=1+1.1*ap;ctx.globalAlpha=1-sstep(.35,.9,ap);ctx.translate(ax,ay+ap*K*.7);ctx.scale(sc,sc);ctx.translate(-ax,-ay)}
+  if(st.phone>.01)add(()=>glow(hx+side*.05*K,hy+.26*K,.36*K,[[0,rgb(196,210,232,.22*st.phone)],[1,rgb(196,210,232,0)]]));
+  ctx.translate(0,-o);ctx.fillStyle=rgb(226,208,164,ra+.1*st.turn);ctx.fill(pp);ctx.translate(0,o);ctx.fillStyle='rgb(3,5,9)';ctx.fill(pp);
+  if(st.turn>.3&&a<.01){const f=sstep(.3,1,st.turn);ctx.fillStyle=rgb(226,208,164,.045*f);ctx.beginPath();ctx.ellipse(hx,hy+ry*.08,rx*.82,ry*.8,lean*.5,0,6.2832);ctx.fill()}
+  if(st.turn>.6&&a<.01){const f=sstep(.6,1,st.turn)*(.24+.3*S.lumS),er=Math.max(.7,.0075*K);ctx.fillStyle=rgb(236,226,200,f);
+    for(const sx of[-1,1]){ctx.beginPath();ctx.arc(hx+sx*rx*.36,hy-ry*.04,er,0,6.2832);ctx.fill()}}
+  ctx.restore();
+}
+function drawHeads(){
+  const yT=H-K*.12,o=clamp(.012*K,.7,3),ra=clamp(.05+.62*S.lumS,0,.8),sw=.52*K,rad=Math.min(.1*K,sw/2);
+  const sp=new Path2D(),walkers=[];
+  for(const s of HEADS)rr(sp,s.x-.26*K,yT,sw,K*.3,rad,true);
+  for(const h of HEADS){if(h.st.away>=1)continue;if(h.st.away>.62){walkers.push(h);continue}person(h,yT,o,ra)}
+  ctx.save();ctx.translate(0,-o);ctx.fillStyle=rgb(170,170,160,ra*.62);ctx.fill(sp);ctx.translate(0,o);ctx.fillStyle='rgb(8,11,18)';ctx.fill(sp);ctx.restore();
+  for(const h of walkers)person(h,yT,o,ra);
+}
+function go(h,dir,speed){const st=h.st;st.awayV=dir>0?1/(speed||7):-1/(speed||6);if(dir>0||st.away<.3)sndSeat(h.x)}
+/* what the row does: in Chapter Two it just watches; in Chapter Three it is bored, then devout, then turns on you, then decides for itself */
+function direct(dt){
+  const all=HEADS.slice().sort((a,b)=>Math.abs(a.x-W/2)-Math.abs(b.x-W/2));
+  VIS=all.filter(h=>h.st.away<1||h.st.awayV);
+  const pre=all.filter(h=>h.st.pre),n=VIS.length,m=S.mode,t=S.mt,E=S.hon;
+  VIS.slice().sort((a,b)=>a.st.r2-b.st.r2).forEach((h,i)=>{h.st.ti=i});
+  S.turnN=m==='peel'?Math.min(n,Math.round(n*clamp(S.peeled/6*1.15,0,1))):0;
+  let mur=0;
+  const premiere=m==='premiere'||(m==='years'&&E===0),pt=S.clock-S.premT,looking=S.T>TL.look[0]&&S.T<TL.unlook[0];
+  for(const h of all){
+    const st=h.st,i=pre.indexOf(h),role=i===1?'leaver':i===2?'phone':i===3?'sleeper':i===4?'phone2':'';
+    let sl=.15,at=0,ph=0,tn=0,ov=0,lk=0;
+    if(S.ch===2){sl=.12}
+    else if(premiere){
+      sl=(.4+.5*st.r1)*sstep(1+st.d*5,3+st.d*5,pt);
+      if(role==='sleeper'&&pt>7.5){sl=1;st.sleep=1}
+      if(role==='phone'&&pt>4)ph=1;
+      if(role==='leaver'&&pt>6.5&&!st.left){st.left=1;go(h,1)}
+      mur=.16+.22*sstep(2,9,pt);
+    }else if(m==='years'){
+      st.sleep=0;at=1;sl=0;ov=S.clock<S.ovEnd&&S.clock>S.landT[4]+DROP&&st.r1>.3?1:0;
+      const due=st.pre?(st.left&&E>=1):E>=st.arrE;
+      if(due&&!st.back&&st.away>0&&S.clock>S.landT[st.pre?0:st.arrE-1]+DROP+.4+st.d*2.2){st.back=1;go(h,-1)}
+    }else if(m==='peel'){at=1;sl=0;tn=st.ti<S.turnN?1:0;const busy=S.clock-S.lastPeel<4;mur=(busy?.1+.4*S.peeled/6:.04+.12*S.peeled/6)}
+    else if(m==='after'||m==='handoff'){ // everyone turns back to the screen; each decides for themselves
+      at=1;sl=0;tn=t>.6+st.ti*.45?0:st.turn>.5?1:0;
+      if(h.key===S.held){ // the one who gets up, and sits down again when he looks at the window
+        if(st.hs===0&&t>3&&S.T>7.6&&S.T<9.4){st.hs=1;st.awayV=1/12;sndSeat(h.x)}
+        else if(st.hs===1&&S.T>=TL.look[0]+.15){st.hs=2;st.awayV=-1/2.2}
+        else if(st.hs===2&&st.away<=0){st.hs=3}
+        if(st.hs>=2)lk=looking?1:.4;
+      }else if(st.r1<.42){if(!st.gone&&st.away<1&&t>5+st.ti*1.1){st.gone=1;go(h,1)}}
+      else lk=looking?1:0;
+      mur=t<2?.06:0;
+    }
+    st.slump=smooth(st.slump,sl,1.3,dt);st.attn=smooth(st.attn,at,1.6,dt);st.phone=smooth(st.phone,ph,2.5,dt);
+    st.turn=smooth(st.turn,tn,1.7,dt);st.ov=smooth(st.ov,ov,2.2,dt);st.lk=smooth(st.lk,lk,2,dt);
+    if(st.awayV){st.away=clamp(st.away+st.awayV*dt,0,1);if(st.away<=0||st.away>=1)st.awayV=0;
+      if(st.away>.27&&st.away<.97&&S.clock>st.stepT){st.stepT=S.clock+.5;sndStep(h.x)}}
+  }
+  S.murT=mur;
+}
+
+/* ---------- audio ---------- */
+const A={ctx:null,out:null,duck:null,vin:null,proj:null,white:null,mur:null,am:null,on:true,last:-1,lastP:-1,lastM:-1,nextAM:0,nextCough:0};
+function audioInit(){
+  if(A.ctx)return;
+  const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+  const c=A.ctx=new AC(),m=A.out=c.createGain();m.gain.value=0;A.duck=c.createGain();m.connect(A.duck).connect(c.destination);
+  // the narrator: a little compression, then the hall it is heard in
+  {const vin=A.vin=c.createGain(),hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=80;
+    const cmp=c.createDynamicsCompressor();cmp.threshold.value=-20;cmp.ratio.value=3;cmp.attack.value=.005;cmp.release.value=.25;
+    const ir=c.createBuffer(2,c.sampleRate*2.4|0,c.sampleRate);
+    for(let k=0;k<2;k++){const d=ir.getChannelData(k);for(let i=0;i<d.length;i++){const t=i/c.sampleRate;d[i]=(Math.random()*2-1)*Math.exp(-t*3.2)*(t<.015?t/.015:1)}}
+    const rv=c.createConvolver();rv.buffer=ir;const dry=c.createGain(),wet=c.createGain();dry.gain.value=.95;wet.gain.value=.16;
+    vin.connect(hp).connect(cmp);cmp.connect(dry).connect(c.destination);cmp.connect(rv).connect(wet).connect(c.destination)}
+  const mkBuf=(sec,fn)=>{const b=c.createBuffer(1,c.sampleRate*sec,c.sampleRate);fn(b.getChannelData(0));return b};
+  const brown=mkBuf(3,d=>{let l=0;for(let i=0;i<d.length;i++){l=(l+.02*(Math.random()*2-1))/1.02;d[i]=l*3.2}});
+  A.white=mkBuf(2,d=>{for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1});
+  const loop=b=>{const s=c.createBufferSource();s.buffer=b;s.loop=true;s.start(0,Math.random()*b.duration);return s};
+  const bq=(type,f,q)=>{const n=c.createBiquadFilter();n.type=type;n.frequency.value=f;if(q)n.Q.value=q;return n};
+  const gn=v=>{const g=c.createGain();g.gain.value=v;return g};
+  const tone=gn(.5);tone.connect(m);
+  loop(brown).connect(bq('lowpass',340)).connect(tone);                    // the hall
+  loop(A.white).connect(bq('highpass',4200)).connect(gn(.005)).connect(tone); // the optical track
+  const am=gn(.5),lfo=c.createOscillator();lfo.type='square';lfo.frequency.value=24;lfo.connect(gn(.5)).connect(am.gain);lfo.start();
+  const pr=A.proj=gn(0);loop(A.white).connect(bq('bandpass',1500,1.2)).connect(am).connect(pr).connect(tone); // the projector
+  for(const [f,g] of[[50,.014],[100,.006]]){const o=c.createOscillator();o.frequency.value=f;o.connect(gn(g)).connect(tone);o.start()}
+  const mam=A.am=gn(.6),mg=A.mur=gn(0);mam.connect(mg).connect(m);   // the row, talking among itself
+  loop(brown).connect(bq('bandpass',420,.7)).connect(gn(1.4)).connect(mam);
+  loop(A.white).connect(bq('bandpass',1050,1.6)).connect(gn(.07)).connect(mam);
+}
+function hit(o){
+  if(!A.ctx||!A.on)return;
+  const c=A.ctx,t0=c.currentTime+(o.at||0);let dest=A.out;
+  if(c.createStereoPanner){const p=c.createStereoPanner();p.pan.value=clamp(o.pan||0,-1,1);p.connect(dest);dest=p}
+  if(o.lp){const l=c.createBiquadFilter();l.type='lowpass';l.frequency.value=o.lp;l.connect(dest);dest=l}
+  const env=(g,pk,d)=>{g.gain.setValueAtTime(.0001,t0);g.gain.linearRampToValueAtTime(pk,t0+.004);g.gain.exponentialRampToValueAtTime(.0001,t0+.004+d)};
+  if(o.f){const os=c.createOscillator(),g=c.createGain();os.frequency.setValueAtTime(o.f,t0);os.frequency.exponentialRampToValueAtTime(o.f*.6,t0+o.fd);
+    env(g,o.g,o.fd);os.connect(g).connect(dest);os.start(t0);os.stop(t0+o.fd+.1)}
+  if(o.nf){const s=c.createBufferSource(),b=c.createBiquadFilter(),g=c.createGain();s.buffer=A.white;b.type='bandpass';b.frequency.value=o.nf;b.Q.value=o.nq||.8;
+    env(g,o.g*(o.ng||1),o.nd);s.connect(b).connect(g).connect(dest);s.start(t0,Math.random()*1.5);s.stop(t0+o.nd+.1)}
+}
+function shaped(f,q,pan,pts){
+  if(!A.ctx||!A.on)return;const c=A.ctx,t0=c.currentTime,s=c.createBufferSource(),b=c.createBiquadFilter(),g=c.createGain();
+  s.buffer=A.white;s.loop=true;b.type='bandpass';b.frequency.value=f;b.Q.value=q;g.gain.setValueAtTime(0,t0+pts[0][0]);
+  for(const [t,v] of pts)g.gain.linearRampToValueAtTime(v,t0+t);
+  let dest=A.out;if(c.createStereoPanner){const p=c.createStereoPanner();p.pan.value=clamp(pan,-1,1);p.connect(dest);dest=p}
+  s.connect(b).connect(g).connect(dest);s.start(t0+pts[0][0]);s.stop(t0+pts[pts.length-1][0]+.1);
+}
+function bell(f,g,d,at){
+  if(!A.ctx||!A.on)return;const c=A.ctx,t0=c.currentTime+(at||0);
+  for(const [m,gg] of[[1,1],[2.76,.32],[5.4,.1]]){const o=c.createOscillator(),e=c.createGain();o.frequency.value=f*m;
+    e.gain.setValueAtTime(.0001,t0);e.gain.linearRampToValueAtTime(g*gg,t0+.005);e.gain.exponentialRampToValueAtTime(.0001,t0+d/Math.sqrt(m));
+    o.connect(e).connect(A.out);o.start(t0);o.stop(t0+d+.1)}
+}
+function chime(g){ // the sound of gold arriving in Chapter Two: two soft sines, nothing in the film makes it
+  if(!A.ctx||!A.on)return;const c=A.ctx,t0=c.currentTime;
+  for(const [f,d] of[[659.3,0],[987.8,.12]]){const o=c.createOscillator(),e=c.createGain();o.frequency.value=f;
+    e.gain.setValueAtTime(0,t0+d);e.gain.linearRampToValueAtTime(g,t0+d+.35);e.gain.exponentialRampToValueAtTime(.0001,t0+d+3);
+    o.connect(e).connect(A.out);o.start(t0+d);o.stop(t0+d+3.1)}
+}
+const panOf=x=>clamp((x/W-.5)*1.4,-.9,.9);
+const sndFoot=P=>hit({f:95,fd:.07,g:P.z>R.D?.03:.05,nf:520,nq:.8,nd:.055,ng:.9,pan:clamp(P.x/3.4,-1,1)*.6,lp:P.z>R.D?700:1600});
+const sndThud=()=>hit({f:90,fd:.2,g:.1,nf:340,nq:.7,nd:.12,ng:.9,pan:-.45,lp:1200});
+const sndLatch=v=>{hit({nf:2300,nq:2.5,nd:.022,g:.02*v,pan:-.45});hit({at:.05,f:420,fd:.02,g:.012*v,pan:-.45})};
+const sndSit=()=>hit({f:92,fd:.09,g:.02,nf:420,nq:1,nd:.09,ng:.8,pan:.1});
+const sndRise=()=>hit({f:80,fd:.14,g:.022,nf:300,nq:.8,nd:.12,ng:.8,pan:.1,lp:900});
+const sndSplice=()=>{hit({nf:3200,nq:1,nd:.012,g:.06});hit({at:.01,f:60,fd:.05,g:.06})};
+const sndStep=x=>hit({f:88,fd:.06,g:.028,nf:480,nq:.8,nd:.045,ng:.9,pan:panOf(x),lp:900});
+function sndSeat(x){
+  if(!A.ctx||!A.on)return;const c=A.ctx,t0=c.currentTime,s=c.createBufferSource(),b=c.createBiquadFilter(),g=c.createGain();
+  s.buffer=A.white;s.loop=true;b.type='bandpass';b.Q.value=8;b.frequency.setValueAtTime(380,t0);b.frequency.linearRampToValueAtTime(220,t0+.45);
+  g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(.05,t0+.08);g.gain.linearRampToValueAtTime(0,t0+.45);
+  let dest=A.out;if(c.createStereoPanner){const p=c.createStereoPanner();p.pan.value=panOf(x);p.connect(dest);dest=p}
+  s.connect(b).connect(g).connect(dest);s.start(t0);s.stop(t0+.55);
+  hit({at:.5,f:120,fd:.08,g:.04,nf:700,nq:1.2,nd:.04,pan:panOf(x),lp:1400});
+}
+const sndCough=()=>{const pan=(Math.random()-.5)*1.4;hit({nf:600,nq:.5,nd:.13,g:.06,pan,lp:1800});hit({at:.22,nf:520,nq:.5,nd:.1,g:.045,pan,lp:1600})};
+const sndShush=(g,pan,at)=>{const t=at||0;shaped(5400,1.2,pan,[[t,0],[t+.1,g],[t+.6,g*.85],[t+.95,0]])};
+const sndLand=i=>{hit({f:70+i*7,fd:.4,g:.16,nf:260,nq:.7,nd:.18,ng:.9,lp:900});bell([392,349,330,294,262][i],.024,2.2,.02);bell([587,523,494,440,392][i],.011,1.8,.04)};
+function sndPeel(id){ // paper tears away; gold rings as it goes
+  shaped(id==='retro'||id==='review'||id==='poll'||id==='book'?2600:1900,.6,(Math.random()-.5)*.6,[[0,0],[.06,.07],[.3,.03],[.55,0]]);
+  hit({f:120,fd:.15,g:.05,nf:900,nq:1,nd:.05,ng:.6,lp:1600});
+  if(id==='prize'||id==='restore')bell(659,.012,1.2,.05);
+}
+function audioUpdate(dt){
+  if(!A.ctx)return;
+  const c=A.ctx,now=c.currentTime,tgt=A.on&&S.mode!=='intro'?.6:0,pt=S.playing?.05:.012,mv=+(S.mur*.5).toFixed(3);
+  if(tgt!==A.last){A.last=tgt;A.out.gain.setTargetAtTime(tgt,now,tgt?.6:.2)}
+  if(pt!==A.lastP){A.lastP=pt;A.proj.gain.setTargetAtTime(pt,now,.5)}
+  if(Math.abs(mv-A.lastM)>.004){A.lastM=mv;A.mur.gain.setTargetAtTime(mv,now,.35)}
+  if(S.clock>A.nextAM){A.nextAM=S.clock+.1+Math.random()*.25;A.am.gain.setTargetAtTime(.3+Math.random()*.7,now,.08)}
+  if(S.mur>.15&&S.clock>A.nextCough){A.nextCough=S.clock+4+Math.random()*7;if(Math.random()<.7)sndCough()}
+  if(S.clap>.02&&A.on){const n=Math.floor(S.clap*60*dt+Math.random());
+    for(let i=0;i<n;i++)hit({at:Math.random()*dt,nf:1100+Math.random()*1500,nq:1.3,nd:.022+Math.random()*.02,g:.05*S.clap*(.45+Math.random()*.55),pan:(Math.random()-.5)*1.6,lp:5200})}
+}
+/* recorded narration, played through the hall; the room's own sound dips under it */
+const VOX={raw:{},buf:{},src:null};
+for(const id of['ch2_watch','ch2_why','ch3_watched'])VOX.raw[id]=fetch('voice/'+id+'.mp3').then(r=>r.ok?r.arrayBuffer():null).catch(()=>null);
+async function speak(id){
+  if(!A.on||!A.ctx)return;
+  if(!VOX.buf[id])VOX.buf[id]=(VOX.raw[id]||Promise.resolve(null)).then(b=>b?A.ctx.decodeAudioData(b.slice(0)):null).catch(()=>null);
+  const b=await VOX.buf[id];if(!b||!A.on)return;
+  stopVoice();const s=A.ctx.createBufferSource();s.buffer=b;s.connect(A.vin);VOX.src=s;
+  A.duck.gain.setTargetAtTime(.35,A.ctx.currentTime,.2);
+  s.onended=()=>{if(VOX.src===s){VOX.src=null;A.duck.gain.setTargetAtTime(1,A.ctx.currentTime,.8)}};
+  s.start(A.ctx.currentTime+.05);
+}
+function stopVoice(){if(VOX.src){try{VOX.src.stop()}catch(_){}VOX.src=null}if(A.duck)A.duck.gain.setTargetAtTime(1,A.ctx.currentTime,.3)}
+function setSound(on){
+  A.on=on;if(on&&S.mode!=='intro')audioInit();if(!on)stopVoice();
+  if(A.ctx&&A.ctx.state==='suspended'&&on)A.ctx.resume();
+  $('#snd').textContent=on?'Sound on':'Sound off';$('#snd').setAttribute('aria-pressed',String(on));A.last=-1;
+}
+/* the film's own sounds: his steps, the door, the chair */
+function filmSound(){
+  const T=S.T,pv=S.prev,P=pose(T),ang=doorAng(T),sitT=TL.sit[0]+1,riseT=TL.rise[0]+.1;
+  if(pv.T!=null&&T>=pv.T&&T-pv.T<.25){
+    if(P.steps!==pv.steps&&P.walk>.12)sndFoot(P);
+    if(pv.ang<.03&&ang>=.03)sndLatch(1);
+    if(pv.ang>=.02&&ang<.02)sndThud();
+    if(pv.T<sitT&&T>=sitT)sndSit();
+    if(S.ch===3&&pv.T<riseT&&T>=riseT)sndRise();
+  }
+  if(pv.rt!=null&&(S.clip==='read1'&&pv.rt<1.6&&S.rt>=1.6||S.clip==='read2'&&pv.rt<1.4&&S.rt>=1.4))chime(.035);
+  pv.T=T;pv.steps=P.steps;pv.ang=ang;pv.rt=S.rt;
+}
+
+/* ---------- running the projector ---------- */
+function startClip(name,hold){
+  const c=CLIPS[name];S.clip=name;S.holdEnd=!!hold;S.loop=name==='loop';S.dur=c.T1-c.T0;
+  S.rt=0;S.pt=0;S.T=c.T0;S.fade=0;S.prev={};S.playing=true;S.out.v=0;S.outT=0;S.dim.v=0;S.dimT=0;
+}
+async function playClip(name,hold){startClip(name,hold);await wait(S.dur+(hold?0:1));if(!hold)S.playing=false}
+function applaud(level,dur){S.clapT=level;S.clapEnd=S.clock+dur}
+function newFilmFrame(i){
+  const r=mulberry(i*7919+13),f=S.fr;f.i=i;
+  f.wx=reduce?0:(r()-.5)*1.1;f.wy=reduce?0:(r()-.5)*1.4;f.fl=(r()*2-1)*(reduce?.3:1);f.gx=r()*256;f.gy=r()*256;
+  f.dust.length=0;const nd=r()<.5?0:r()<.72?1:2;
+  for(let j=0;j<nd;j++)f.dust.push({x:r(),y:r(),r:.6+r()*r()*3,q:r(),l:r()<.35});
+  f.hair=r()<.02?{x:r(),y:r(),a:r()*6.28,len:.03+r()*.05}:null;
+  for(const s of SCR){s.x=clamp(s.x+(r()-.5)*.002,.04,.96);s.on=r()<s.p;s.a=.04+r()*.1}
+}
+function update(dt){
+  S.clock+=dt;S.mt+=dt;
+  for(let i=waits.length-1;i>=0;i--){const w=waits[i];if(w.id!==runId){waits.splice(i,1);continue}
+    if(w.fn?w.fn():S.clock>=w.t){waits.splice(i,1);w.res()}}
+  if(S.lead>=0)S.lead+=dt;
+  S.cut=Math.max(0,S.cut-dt);S.shake=Math.max(0,S.shake-dt*2.5);S.rsn=Math.max(0,S.rsn-dt*.8);
+  tween(S.dim,S.dimT,2.2,dt);tween(S.out,S.outT,2.6,dt);tween(S.split,S.splitT,1.6,dt);
+  S.railA=smooth(S.railA,S.railT,1.6,dt);
+  let lum=S.mode==='intro'||S.mode==='intro3'?.13+.03*Math.sin(S.clock*.9):.02;
+  if(S.playing){
+    S.rt+=dt;S.pt+=dt;
+    if(S.rt>=S.dur){if(S.loop){S.rt-=S.dur;S.cut=.08;S.prev={};sndSplice()}else S.rt=S.dur}
+    const c=CLIPS[S.clip];S.T=lerp(c.T0,c.T1,clamp(S.rt/S.dur,0,1));
+    S.fade=sstep(0,2.4,S.pt)*(S.holdEnd||S.loop?1:1-sstep(S.dur-2.2,S.dur,S.rt))*(1-eio(S.out.v));
+    filmSound();
+    lum=S.fade*(.4+.34*clamp(doorAng(S.T)/OPEN,0,1))*(1-.5*S.dim.v);
+  }
+  // fifty years, at the pace they are dragged
+  if(S.mode==='years'){
+    if(S.yearT>S.year)S.year=Math.min(S.yearT,S.year+8*dt);
+    while(S.hon<5&&S.year>=HY[S.hon]){landHon(S.hon);S.hon++}
+  }
+  for(const cd of S.cards)if(cd.t!==null&&!cd.landed){cd.t+=dt;if(cd.t>=DROP){cd.landed=true;onLand(cd)}}else if(cd.t!==null)cd.t+=dt;
+  S.hint=smooth(S.hint,(S.mode==='years'&&!S.dragged&&S.railA>.5)||(S.mode==='peel'&&S.peeled===0&&S.mt>1.5)?1:0,1.5,dt);
+  if(S.clock>S.clapEnd)S.clapT=0;
+  S.clap=smooth(S.clap,S.clapT,S.clapT>S.clap?2.4:.8,dt);
+  direct(dt);
+  S.mur=smooth(S.mur,S.murT,1,dt);
+  updParts(dt);
+  if(S.ch===3&&S.mode!=='handoff')lum+=.06*Math.max(0,S.hon-S.peeled)/5;
+  S.lumS+=(lum-S.lumS)*(1-Math.exp(-dt*4));
+  const fi=Math.floor(S.clock*24);if(fi!==S.fr.i)newFilmFrame(fi);
+  audioUpdate(dt);
+}
+
+/* ---------- words ---------- */
+const askEl=$('#ask'),qEl=$('#q'),optsEl=$('#opts'),sayEl=$('#say'),capEl=$('#cap'),revEl=$('#rev'),quoteEl=$('#quote'),byEl=$('#by'),liveEl=$('#live'),again=$('#again');
+const live=t=>{liveEl.textContent=t};
+function setStep(i){S.step=i;S.lastStep=-1}
+function ask(Q){
+  return new Promise(res=>{
+    qEl.textContent=Q.q;optsEl.textContent='';
+    if(Q.caps){optsEl.dataset.cols=Q.caps;optsEl.className='opts caps c'+(FW<520?2:Q.caps)}else{delete optsEl.dataset.cols;optsEl.className='opts'}
+    askEl.classList.remove('picked','ready');
+    Q.opts.forEach(([lab,val],i)=>{
+      const b=document.createElement('button');b.type='button';b.className='opt';b.textContent=lab;b.style.setProperty('--d',(.9+i*.16)+'s');
+      b.addEventListener('click',async()=>{
+        if(askEl.classList.contains('picked')||!askEl.classList.contains('ready'))return;
+        for(const o of optsEl.children)o.style.setProperty('--d','0s');
+        b.classList.add('chosen');askEl.classList.add('picked');
+        await wait(1);askEl.classList.remove('on');await wait(1);res(val);
+      });
+      optsEl.appendChild(b)});
+    void askEl.offsetWidth;askEl.classList.add('on');live(Q.q+' '+Q.opts.map((o,i)=>(i+1)+'. '+o[0]).join(' '));
+    wait(1.2+Q.opts.length*.16).then(()=>askEl.classList.add('ready'));
+  });
+}
+function line(text,cls){const p=document.createElement('p');p.className='s'+(cls?' '+cls:'');p.textContent=text;return p}
+async function say(lines,o){
+  o=Object.assign({gap:3.2,hold:3.6,cls:'',keep:false},o);
+  for(const e of sayEl.querySelectorAll('.s'))e.remove();
+  const els=lines.map((t,i)=>sayEl.insertBefore(line(t,Array.isArray(o.cls)?o.cls[i]:o.cls),again));
+  for(let i=0;i<els.length;i++){void els[i].offsetWidth;els[i].classList.add('on');live(lines[i]);await wait(i<els.length-1?o.gap:o.hold)}
+  if(o.keep)return els;
+  for(const e of els)e.classList.remove('on');
+  await wait(2);for(const e of els)e.remove();
+}
+async function caption(text,dur){
+  const p=line(text,'it');capEl.textContent='';capEl.appendChild(p);void p.offsetWidth;p.classList.add('on');
+  await wait(dur);p.classList.remove('on');
+}
+async function review(){
+  const text='“'+reviewText()+'”';
+  quoteEl.textContent='';byEl.classList.remove('on');revEl.classList.add('on');live('Five stars. '+text+' Signed: You.');
+  if(A.ctx)chime(.04);
+  await wait(1.4);
+  for(let i=1;i<=text.length;i++){quoteEl.textContent=text.slice(0,i);await wait(reduce?0:.034)}
+  await wait(.8);byEl.classList.add('on');await wait(4.2);
+  revEl.classList.remove('on');await wait(1.6);
+}
+
+/* ---------- Chapter Two ---------- */
+async function run2(){
+  setMode('ch2');setStep(0);
+  S.lead=0;await wait(1.5);S.lead=-1;
+  live('The film begins. A man enters an empty room at night, sits on a wooden chair, looks toward a dark window, and leaves. The camera stays on the empty room.');
+  caption('Watch closely.',3.6);speak('ch2_watch');
+  await playClip('film');
+  setStep(1);speak('ch2_why');S.q1=await ask(Q1);
+  setStep(2);live('Part of the film plays again. Your answer is drawn over it in gold.');await playClip('read1');
+  setStep(3);S.q2=await ask(Q2);
+  setStep(4);live('Another part plays. More of the room is drawn in gold.');await playClip('read2');
+  setStep(5);await review();
+  setStep(6);live('Side by side: the film on the left, your film on the right. The gold on the right fades until the two are the same.');
+  S.splitT=1;startClip('split',true);await wait(CLIPS.split.T1-CLIPS.split.T0);
+  S.dimT=1;await wait(1.6);
+  await say(['Nothing on the left changed.','Everything on the right was yours.'],{cls:'it',gap:3.4,hold:4.4});
+  setStep(7);S.outT=1;await wait(2.8);S.playing=false;S.splitT=0;S.split.v=0;
+  document.body.classList.add('final');
+  const els=await say(['Criticism can reveal meaning.','It can also manufacture it.'],{cls:['big soft','big'],gap:3.2,hold:4.6,keep:true});
+  for(const e of els)e.classList.remove('on');
+  await wait(2.2);for(const e of els)e.remove();
+  document.body.classList.remove('final');
+  toChapter3();
+}
+/* ---------- the turn: the same review is carried into Chapter Three ---------- */
+function toChapter3(){
+  S.ch=3;setMode('intro3');S.step=0;S.playing=false;S.clip=null;S.dimT=0;S.dim.v=0;
+  ST.clear();attach();
+  $('#chap').textContent='Chapter Three';
+  document.body.classList.add('intro3');
+  const b=$('#cta3');b.tabIndex=0;setTimeout(()=>b.focus({preventScroll:true}),400);
+  S.lastStep=-1;live('Chapter Three. You are the audience. The canon decides what matters.');
+}
+
+/* ---------- Chapter Three ---------- */
+async function run3(){
+  // the premiere: the same film, in 1974, and a row that cannot be bothered
+  setMode('premiere');setStep(0);startClip('loop');S.premT=S.clock;
+  live('1974. The premiere of the film you watched in Chapter Two. Most seats are empty. Nobody in the row is really watching.');
+  caption('The film that you watched in Chapter Two.',4.6);speak('ch3_watched');
+  await until(()=>S.rt>=12.5||S.pt>=12.5);
+  // fifty years, as fast as you drag them; each honour lands on top of the last
+  setMode('years');setStep(1);S.railT=1;
+  live('A timeline runs under the screen from 1974 to today. Drag it forward, or press the right arrow key. Each honour lands on the screen, on top of the one before. The film keeps playing, unchanged.');
+  await until(()=>S.year>=Y1);
+  await until(()=>S.cards.every(c=>c.landed)&&S.clock>S.ovEnd);
+  await wait(1);
+  // the layers, newest first
+  S.railT=0;setMode('peel');setStep(2);
+  live('Today. The screen is covered by six layers. The top one is a textbook page; its last line gives its reason. Drag the top layer away, or press Space, to see what that reason rests on.');
+  await until(()=>S.peeled>=6);
+  // the reading itself, glimpsed once more on the film, and gone
+  await wait(.5);S.rg=1;chime(.035);
+  await wait(1.6);
+  {const t0=S.clock;await until(()=>{S.rg=1-sstep(t0,t0+3.2,S.clock);return S.rg<=0})}
+  // the film, judged on its own
+  const cand=VIS.filter(h=>h.st.r1>=.42&&h.st.away<1);S.held=cand[0]?cand[0].key:null;
+  setMode('after');setStep(3);
+  live('The row turns back to the screen and looks at the film itself. Some get up and leave. One stands, and sits down again when the man looks toward the window. Others stay.');
+  await until(()=>!S.held||!ST.get(S.held)||ST.get(S.held).hs===3||S.mt>32);
+  await wait(2.5);
+  S.dimT=1;
+  const els=await say(['None of this would be here without a reading. The first one was yours.','A film does not owe us an explanation. Nor do we owe it admiration.','Audiences can judge a film again and again.'],{cls:['big soft','big','big soft'],gap:3.8,hold:5,keep:true});
+  for(const e of els)e.classList.remove('on');
+  setMode('handoff');S.outT=1;
+  await wait(3.4);S.playing=false;for(const e of els)e.remove();
+  document.body.classList.add('final');
+  await say(['Tonight, the greatest director of all time premieres his new film.'],{cls:'big',hold:3,keep:true});
+  again.textContent=NEXT_CHAPTER?'Continue':'Watch it again';
+  again.classList.add('show');void again.offsetWidth;again.classList.add('on');again.tabIndex=0;
+}
+
+function start(){
+  if(S.mode!=='intro')return;
+  document.body.classList.remove('intro');$('#restartTop').classList.add('on');
+  if(A.on){audioInit();if(A.ctx&&A.ctx.state==='suspended')A.ctx.resume()}
+  run2();
+}
+function start3(){
+  if(S.mode!=='intro3')return;
+  document.body.classList.remove('intro3');$('#cta3').tabIndex=-1;
+  if(A.on){audioInit();if(A.ctx&&A.ctx.state==='suspended')A.ctx.resume()}
+  run3();
+}
+function clearDom(){
+  for(const e of sayEl.querySelectorAll('.s'))e.remove();
+  capEl.textContent='';askEl.classList.remove('on','picked','ready');revEl.classList.remove('on');quoteEl.textContent='';byEl.classList.remove('on');
+  again.classList.remove('on','show');again.tabIndex=-1;
+  document.body.classList.remove('final','intro','intro3');cv.style.cursor='';
+  A.last=-1;A.lastP=-1;A.lastM=-1;stopVoice();
+}
+function restart(){ // from the top of Chapter Two
+  runId++;waits.length=0;PARTS.length=0;ST.clear();
+  S=fresh();attach();clearDom();
+  $('#chap').textContent='Chapter Two';$('#cta3').tabIndex=-1;
+  document.body.classList.add('intro');$('#restartTop').classList.remove('on');
+  setTimeout(()=>$('#cta').focus({preventScroll:true}),60);
+}
+function restart3(){ // Chapter Three again, with the same review
+  const q1=S.q1,q2=S.q2;
+  runId++;waits.length=0;PARTS.length=0;
+  S=fresh();S.q1=q1;S.q2=q2;clearDom();toChapter3();
+}
+
+/* ---------- input ---------- */
+const onRail=(x,y)=>S.mode==='years'&&S.railA>.3&&Math.abs(y-BARY)<30&&x>W/2-BARW/2-24&&x<W/2+BARW/2+24;
+function dragTo(x){S.yearT=Math.max(S.yearT,xYear(x));if(S.yearT>S.year+.3)S.dragged=true}
+cv.addEventListener('pointerdown',e=>{
+  const x=e.clientX,y=e.clientY;
+  if(onRail(x,y)){S.dragging=true;try{cv.setPointerCapture(e.pointerId)}catch(_){}dragTo(x);e.preventDefault();return}
+  if(S.mode==='peel'){const tc=topCard();if(tc&&hitCard(tc,x,y)){S.drag={cd:tc,sx:x,sy:y,dx:0,dy:0};try{cv.setPointerCapture(e.pointerId)}catch(_){}cv.style.cursor='grabbing';e.preventDefault()}}
+});
+cv.addEventListener('pointermove',e=>{
+  const x=e.clientX,y=e.clientY;
+  if(S.dragging){dragTo(x);return}
+  if(S.drag){S.drag.dx=x-S.drag.sx;S.drag.dy=y-S.drag.sy;return}
+  if(S.mode==='peel'){const tc=topCard();cv.style.cursor=tc&&hitCard(tc,x,y)?'grab':'';return}
+  cv.style.cursor=onRail(x,y)?'ew-resize':'';
+});
+const up=()=>{
+  S.dragging=false;const d=S.drag;if(!d)return;
+  const l=Math.hypot(d.dx,d.dy);
+  if(l>FH*.14||l<6)peel(d.cd,d.dx,d.dy);else{d.cd.bx=d.dx;d.cd.by=d.dy;d.cd.back=1} // not far enough: it settles back
+  S.drag=null;cv.style.cursor='';
+};
+cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+$('#cta').addEventListener('click',start);
+$('#cta3').addEventListener('click',start3);
+$('#restartTop').addEventListener('click',restart);
+again.addEventListener('click',()=>{if(NEXT_CHAPTER)location.href=NEXT_CHAPTER;else restart3()});
+$('#snd').addEventListener('click',()=>setSound(!A.on));
+addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  if(askEl.classList.contains('ready')&&!askEl.classList.contains('picked')){const n=parseInt(e.key,10);if(n>=1&&n<=optsEl.children.length){e.preventDefault();optsEl.children[n-1].click()}return}
+  if(S.mode==='years'&&(e.key==='ArrowRight'||e.key==='ArrowUp')){e.preventDefault();S.yearT=Math.min(Y1,Math.max(S.yearT,S.year)+3);S.dragged=true}
+  if(S.mode==='peel'&&(e.code==='Space'||e.key===' ')&&!e.repeat){e.preventDefault();const tc=topCard();if(tc&&!S.drag)peel(tc,0,0)}
+});
+addEventListener('resize',resize);
+document.addEventListener('visibilitychange',()=>{lastT=0;if(A.ctx){if(document.hidden)A.ctx.suspend();else if(A.on)A.ctx.resume()}});
+
+/* ---------- DOM state ---------- */
+let tickFor=0;
+function updateDom(){
+  if(S.step===S.lastStep)return;S.lastStep=S.step;
+  const L=S.ch===2?STEPS2:STEPS3,nm=L[S.step]||L[0],intro=S.mode==='intro'||S.mode==='intro3';
+  $('#lbl').textContent=String(S.step+1).padStart(2,'0')+' / '+String(L.length).padStart(2,'0')+' · '+nm;
+  $('#scn').textContent=intro?(S.ch===2?'Critics ask what it means.':'The canon decides what matters.'):nm;
+  $('#fill').style.width=((S.step+1)/L.length*100)+'%';
+  $('#prog').setAttribute('aria-valuenow',String(S.step+1));$('#prog').setAttribute('aria-valuemax',String(L.length));
+  if(tickFor!==L.length){tickFor=L.length;const bar=$('#pbar');for(const t of bar.querySelectorAll('.tick'))t.remove();
+    for(let i=1;i<L.length;i++){const t=document.createElement('i');t.className='tick';t.style.left=(i/L.length*100)+'%';bar.appendChild(t)}}
+}
+
+/* ---------- main loop ---------- */
+let lastT=0,accum=0,nframes=0;
+function frame(ts){
+  requestAnimationFrame(frame);
+  if(!lastT){lastT=ts;return}
+  const dt=Math.min((ts-lastT)/1000,.05);lastT=ts;
+  accum+=dt;nframes++;
+  if(nframes===90){if(accum/90>.028&&quality>.55){quality*=.8;resize()}accum=0;nframes=0}
+  tick(dt);
+}
+function tick(dt){
+  update(dt);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  ctx.fillStyle='#040507';ctx.fillRect(0,0,W,H);
+  if(S.shake>0&&!reduce)ctx.translate(S.shake*2.5*Math.sin(S.clock*71),S.shake*3*Math.sin(S.clock*53));
+  drawHall();drawFilm();drawStack();drawRail();drawPeelHint();drawParts();drawHeads();
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  ctx.save();ctx.translate(-S.fr.gx,-S.fr.gy);ctx.globalAlpha=.5;ctx.fillStyle=grainPat;ctx.fillRect(0,0,W+256,H+256);ctx.restore();
+  ctx.fillStyle=vigGrad;ctx.fillRect(0,0,W,H);
+  updateDom();
+}
+resize();
+requestAnimationFrame(frame);
+setTimeout(()=>{if(S.mode==='intro')$('#cta').focus({preventScroll:true})},200);
+// arriving from the chapter list at #ch3: start at Chapter Three, with a review written from a default pair of answers
+if(location.hash==='#ch3'){S.q1='alone';S.q2='loneliness';document.body.classList.remove('intro');toChapter3();}
+})();
+</script>
+
+<style>
+/* chapter switcher: the chapter name in the top-left opens a short list of all four */
+.top .left{position:relative}
+.chapsel{cursor:pointer;pointer-events:auto;outline:none;transition:color .6s}
+.chapsel::after{content:"";display:inline-block;width:5px;height:5px;margin-left:.8em;border-right:1px solid currentColor;border-bottom:1px solid currentColor;transform:translateY(-3px) rotate(45deg);opacity:.55;transition:transform .5s cubic-bezier(.22,.61,.36,1)}
+.chapsel[aria-expanded="true"]::after{transform:translateY(0) rotate(-135deg)}
+.chapsel:hover,.chapsel:focus-visible{color:#cdbb8e}
+.chapnav{position:absolute;left:-14px;top:calc(100% + 8px);z-index:30;display:flex;flex-direction:column;min-width:14em;padding:8px 0;background:rgba(5,7,10,.94);border-top:1px solid rgba(205,187,142,.4);pointer-events:auto;
+  opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .45s cubic-bezier(.22,.61,.36,1),transform .45s cubic-bezier(.22,.61,.36,1),visibility 0s .45s}
+.chapnav.on{opacity:1;visibility:visible;transform:none;transition:opacity .6s cubic-bezier(.22,.61,.36,1),transform .6s cubic-bezier(.22,.61,.36,1),visibility 0s}
+.chapnav a{display:block;padding:10px 14px;font-size:.72rem;letter-spacing:.34em;text-transform:uppercase;text-decoration:none;color:rgba(241,232,211,.62);white-space:nowrap;transition:color .5s}
+.chapnav a:hover,.chapnav a:focus-visible{color:#f1e8d3;outline:none}
+.chapnav a.cur{color:#cdbb8e}
+</style>
+<script>
+(()=>{
+  const CH=[['Chapter One','index.html'],['Chapter Two','chapter2-3.html'],['Chapter Three','chapter2-3.html#ch3'],['Chapter Four','chapter4.html']];
+  const b=document.querySelector('.top .left b');if(!b)return;const left=b.parentElement;
+  b.classList.add('chapsel');b.setAttribute('role','button');b.tabIndex=0;b.setAttribute('aria-haspopup','true');b.setAttribute('aria-expanded','false');b.title='Choose a chapter';
+  const nav=document.createElement('nav');nav.className='chapnav';nav.setAttribute('aria-label','Chapters');
+  for(const [name,url] of CH){const a=document.createElement('a');a.href=url;a.textContent=name;a.addEventListener('click',e=>{e.preventDefault();go(url);});nav.append(a);}
+  left.append(nav);
+  const open=on=>{for(const a of nav.children)a.classList.toggle('cur',a.textContent===b.textContent.trim());nav.classList.toggle('on',on);b.setAttribute('aria-expanded',String(on));};
+  b.addEventListener('click',e=>{e.stopPropagation();open(!nav.classList.contains('on'));});
+  b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();open(!nav.classList.contains('on'));}});
+  addEventListener('pointerdown',e=>{if(!left.contains(e.target))open(false);},true);
+  addEventListener('keydown',e=>{if(e.key==='Escape')open(false);});
+  // Chapters Two and Three share a page; switching between them reloads it with or without #ch3
+  function go(url){const u=new URL(url,location.href);
+    if(u.pathname!==location.pathname){location.href=url;return;}
+    try{history.replaceState(null,'',u.pathname+u.search+u.hash);location.reload();}catch(e){location.href=url;}}
+})();
+</script>
+</body>
+</html>

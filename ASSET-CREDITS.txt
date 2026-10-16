@@ -1,0 +1,25 @@
+THE PREMIERE — MATERIALS AND WEB SCENE
+
+Auditorium architecture, seats, draped curtains, ornament, projector, director's
+chair, clothing and scene construction were created for this exhibition.
+
+The fictional director's anatomical head and hands use the MakeHuman hm08 base
+mesh with a blend of male age / proportion targets. These graphical assets
+were explicitly released under CC0 in September 2020.
+
+Source repository:
+https://github.com/makehumancommunity/makehuman
+Base mesh:
+https://github.com/makehumancommunity/makehuman/blob/master/makehuman/data/3dobjs/base.obj
+Current asset licence:
+https://github.com/makehumancommunity/makehuman/blob/master/LICENSE.md
+
+The figure is a fictional character assembled from a generic anatomical mesh,
+not a likeness or scan of a named filmmaker.
+
+No colour textures, photography, or generative image backgrounds are used in
+the clay renders. The architectural detail is physical scene geometry.
+
+PBR textures were procedurally authored for this exhibition. Three.js is MIT; see vendor/THREE-LICENSE.txt. Cormorant Garamond uses OFL; see vendor/FONT-LICENSE.txt. Sound recordings were supplied by the user.
+
+PBR textures were procedurally authored for this exhibition. Three.js is MIT; see vendor/THREE-LICENSE.txt. Cormorant Garamond uses OFL; see vendor/FONT-LICENSE.txt. Sound recordings were supplied by the user.
