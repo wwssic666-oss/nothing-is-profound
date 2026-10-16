@@ -108,6 +108,10 @@ dialog .acts{display:flex;gap:clamp(12px,4vw,36px);flex-wrap:wrap;justify-conten
   #steps{bottom:max(70px,calc(env(safe-area-inset-bottom) + 64px))}
   #places button{font-size:.6rem;letter-spacing:.22em}
   #subtitle{bottom:20%;left:5%;width:90%}
+  #subtitle{font-size:1.02rem}
+  .veil h1{font-size:2rem}
+  .veil p{font-size:.95rem}
+  #credits article{font-size:1.02rem}
   #subtitle.caps{font-size:.68rem}
   .eyebrow{font-size:.62rem}
   .btn{font-size:.7rem;letter-spacing:.34em;padding:13px 18px 13px calc(18px + .34em)}
