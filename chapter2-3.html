@@ -102,8 +102,17 @@ body.reduced .s{filter:none;transform:none}
 .btn:hover{background:rgba(205,187,142,.12)}
 noscript{position:fixed;inset:0;display:grid;place-items:center;text-align:center;padding:2rem;font-family:var(--serif);font-size:1.4rem}
 @media (max-width:640px){
-  .top{font-size:.66rem;letter-spacing:.26em}
+  .top{font-size:.6rem;letter-spacing:.18em;padding-left:16px;padding-right:12px}
+  .top .left,.top .left b,.top button{white-space:nowrap}
+  .top .right{flex-wrap:nowrap;gap:2px}
+  .top button{font-size:.6rem;letter-spacing:.12em;padding:10px 4px}
   .top .left .scn{display:none}
+  .bottom{font-size:.6rem;letter-spacing:.22em}
+  .cta .t1{font-size:.7rem}
+  .cta .t2{font-size:.58rem}
+  .btn{font-size:.7rem;letter-spacing:.34em;padding:13px 18px 13px calc(18px + .34em)}
+  #rev .by{font-size:.64rem}
+  .opts.caps .opt{font-size:.74rem;letter-spacing:.24em}
 }
 @media (prefers-reduced-motion:reduce){.cta .ring{animation:none}}
 </style>
@@ -1328,6 +1337,7 @@ if(location.hash==='#ch3'){S.q1='alone';S.q2='loneliness';document.body.classLis
 .chapnav a{display:block;padding:10px 14px;font-size:.72rem;letter-spacing:.34em;text-transform:uppercase;text-decoration:none;color:rgba(241,232,211,.62);white-space:nowrap;transition:color .5s}
 .chapnav a:hover,.chapnav a:focus-visible{color:#f1e8d3;outline:none}
 .chapnav a.cur{color:#cdbb8e}
+@media (max-width:640px){.chapnav a{font-size:.62rem;letter-spacing:.24em}}
 </style>
 <script>
 (()=>{

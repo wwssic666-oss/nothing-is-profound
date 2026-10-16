@@ -101,10 +101,25 @@ body.reduced .line{transform:translate(-50%,0);filter:none}
 .cue.on{opacity:1;visibility:visible;transition:opacity 1.2s var(--ease),visibility 0s}
 noscript{position:fixed;inset:0;display:grid;place-items:center;text-align:center;padding:2rem;font-family:var(--serif);font-size:1.4rem}
 @media (max-width:640px){
-  .top{font-size:.66rem;letter-spacing:.26em}
-  .top button{padding:10px 6px;letter-spacing:.2em}
+  .top{font-size:.6rem;letter-spacing:.18em;padding-left:16px;padding-right:12px}
+  .top .left,.top .left b,.top button{white-space:nowrap}
+  .top .right{flex-wrap:nowrap;gap:2px}
+  .top button{font-size:.6rem;letter-spacing:.12em;padding:10px 4px}
   .top .left .scn{display:none}
-  #vf .info{font-size:.66rem;letter-spacing:.06em}
+  #vf .info{font-size:.58rem;letter-spacing:.06em;transition:opacity .8s}
+  body:has(#act.on) #vf .info{opacity:0}
+  #prog{font-size:.6rem;letter-spacing:.22em}
+  #intro .eyebrow{font-size:.66rem}
+  #cta .t1{font-size:.7rem}
+  /* phone: the take card sits at the bottom, the spoken lines above it, the hold cue above them */
+  #act{bottom:calc(max(16px,env(safe-area-inset-bottom)) + 38px);gap:8px}
+  #act .tag{font-size:.62rem;letter-spacing:.2em}
+  #act p{font-size:.92rem;line-height:1.35}
+  #actBtn{font-size:.68rem;letter-spacing:.34em;padding:12px 18px 12px calc(18px + .34em)}
+  .line.sub{bottom:calc(max(16px,env(safe-area-inset-bottom)) + 182px)}
+  .line.std{bottom:calc(max(16px,env(safe-area-inset-bottom)) + 186px)}
+  .line.final{bottom:calc(max(16px,env(safe-area-inset-bottom)) + 272px)}
+  .cue{bottom:calc(max(16px,env(safe-area-inset-bottom)) + 288px);font-size:.95rem}
 }
 @media (prefers-reduced-motion:reduce){#cta .ring{animation:none}body.rec #vf .dot{animation:none}}
 </style>
@@ -1062,6 +1077,7 @@ setTimeout(()=>{if(S.act===0)$('#cta').focus({preventScroll:true})},200);
 .chapnav a{display:block;padding:10px 14px;font-size:.72rem;letter-spacing:.34em;text-transform:uppercase;text-decoration:none;color:rgba(241,232,211,.62);white-space:nowrap;transition:color .5s}
 .chapnav a:hover,.chapnav a:focus-visible{color:#f1e8d3;outline:none}
 .chapnav a.cur{color:#cdbb8e}
+@media (max-width:640px){.chapnav a{font-size:.62rem;letter-spacing:.24em}}
 </style>
 <script>
 (()=>{

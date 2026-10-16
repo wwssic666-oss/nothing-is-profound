@@ -99,11 +99,20 @@ dialog .acts{display:flex;gap:clamp(12px,4vw,36px);flex-wrap:wrap;justify-conten
 #black.on{opacity:1;pointer-events:auto}
 
 @media (max-width:640px){
-  .top{font-size:.66rem;letter-spacing:.26em}
+  .top{font-size:.6rem;letter-spacing:.18em;padding-left:16px;padding-right:12px}
+  .top .left,.top .left b,.top button{white-space:nowrap}
+  .top .right{flex-wrap:nowrap;gap:2px}
+  .top button{font-size:.6rem;letter-spacing:.12em;padding:10px 4px}
   .top .left .scn{display:none}
-  #hint{font-size:.62rem;letter-spacing:.2em;line-height:1.8}
+  #hint{font-size:.58rem;letter-spacing:.18em;line-height:1.8}
   #steps{bottom:max(70px,calc(env(safe-area-inset-bottom) + 64px))}
-  #places button{font-size:.64rem;letter-spacing:.26em}
+  #places button{font-size:.6rem;letter-spacing:.22em}
   #subtitle{bottom:20%;left:5%;width:90%}
+  #subtitle.caps{font-size:.68rem}
+  .eyebrow{font-size:.62rem}
+  .btn{font-size:.7rem;letter-spacing:.34em;padding:13px 18px 13px calc(18px + .34em)}
+  .link,#closecredits{font-size:.64rem}
+  .opt{font-size:.66rem}
+  #credits p.by{font-size:.64rem}
 }
 @media (prefers-reduced-motion:reduce){.cta .ring{animation:none}}

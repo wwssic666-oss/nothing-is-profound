@@ -83,10 +83,13 @@ body.reduced #q .ch{transform:none}
 .top,.bottom,#again{display:none!important}
 noscript{position:fixed;inset:0;display:grid;place-items:center;text-align:center;padding:2rem;font-family:var(--serif);font-size:1.4rem}
 @media (max-width:640px){
-  .top{font-size:.66rem;letter-spacing:.26em}
+  .top{font-size:.6rem;letter-spacing:.18em;padding-left:16px;padding-right:12px}
+  .top .left,.top .left b,.top button{white-space:nowrap}
+  .top .right{flex-wrap:nowrap;gap:2px}
+  .top button{font-size:.6rem;letter-spacing:.12em;padding:10px 4px}
   .top .left .scn{display:none}
   .line.sub{bottom:calc(9% + 12px)}
-  .hint{font-size:.68rem;letter-spacing:.24em;padding-left:.24em}
+  .hint{font-size:.6rem;letter-spacing:.22em;padding-left:.22em}
 }
 </style>
 
